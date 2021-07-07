@@ -1,6 +1,6 @@
 {
   "name": "bmw-connected-drive",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -33,5 +33,14 @@
   "bugs": {
     "url": "https://github.com/lsiddiquee/bmw-connected-drive/issues"
   },
-  "homepage": "https://github.com/lsiddiquee/bmw-connected-drive#readme"
+  "homepage": "https://github.com/lsiddiquee/bmw-connected-drive#readme",
+  "keywords": [
+    "bmwconnected",
+    "bmw connected",
+    "bmwconnecteddrive",
+    "bmw connected drive",
+    "connected drive",
+    "connecteddrive",
+    "bmw"
+  ]
 }

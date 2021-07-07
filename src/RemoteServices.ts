@@ -10,5 +10,7 @@ export enum RemoteServices {
     /** light */
     FlashLight = "RLF",
     /** Climate timer */
-    ClimateTimer = "RCT"
+    ClimateTimer = "RCT",
+    /** Charging profile */
+    ChargingProfile = "RCP"
 }
