@@ -1,7 +1,7 @@
 import { ILogger } from "./ILogger";
 import { LogLevel } from "./LogLevel";
 
-export abstract class Logger implements ILogger {
+export abstract class LoggerBase implements ILogger {
     abstract Log(level: LogLevel, message: string): void;
 
     LogTrace(message: string) {

@@ -1,6 +1,6 @@
 import { LogLevel } from "./LogLevel"
 import { ILogger } from "./ILogger"
-import { Logger } from "./Logger"
+import { LoggerBase } from "./LoggerBase"
 import { ITokenStore } from "./ITokenStore"
 import { Token } from "./Token"
 import { Regions } from "./Regions"
@@ -15,4 +15,4 @@ import { DetailedServiceStatus } from "./DetailedServiceStatus"
 import { RemoteServiceExecutionState } from "./RemoteServiceExecutionState"
 import { RemoteServiceExecutionStateDetailed } from "./RemoteServiceExecutionStateDetailed"
 
-export { LogLevel, ILogger, Logger, ITokenStore, Token, Regions, Account, ConnectedDrive, Vehicle, VehicleStatus, RemoteServices, RemoteServiceResponse, ServiceStatus, DetailedServiceStatus, RemoteServiceExecutionState, RemoteServiceExecutionStateDetailed }
+export { LogLevel, ILogger, LoggerBase, ITokenStore, Token, Regions, Account, ConnectedDrive, Vehicle, VehicleStatus, RemoteServices, RemoteServiceResponse, ServiceStatus, DetailedServiceStatus, RemoteServiceExecutionState, RemoteServiceExecutionStateDetailed }
