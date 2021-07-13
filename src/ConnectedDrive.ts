@@ -9,21 +9,26 @@ import { VehicleStatus } from "./VehicleStatus";
 import { RemoteServiceExecutionState } from "./RemoteServiceExecutionState";
 import { Regions } from "./Regions";
 import { ITokenStore } from "./ITokenStore";
+import { ILogger } from "./ILogger";
 
 export class ConnectedDrive {
     serviceExecutionStatusCheckInterval = 5000;
     account: Account;
+    logger?: ILogger;
 
-    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore) {
+    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger) {
         this.account = new Account(username, password, region, tokenStore);
+        this.logger = logger;
     }
 
     async getVehicles(): Promise<Vehicle[]> {
+        this.logger?.LogInformation("Getting vehicles");
         const url: string = `https://${Constants.ServerEndpoints[this.account.region]}/webapi/v1/user/vehicles`;
         return (await this.request(url)).vehicles;
     }
 
     async getVehicleStatus(vin: string): Promise<VehicleStatus> {
+        this.logger?.LogInformation("Getting vehicle status.");
         let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicleStatus}`;
         url = url.replace("{vehicleVin}", vin);
 
@@ -31,18 +36,22 @@ export class ConnectedDrive {
     }
 
     async lockDoors(vin: string, waitExecution: boolean = false): Promise<RemoteServiceResponse> {
+        this.logger?.LogInformation("Locking doors");
         return await this.executeService(vin, RemoteServices.LockDoors, { "clientId": 2, "doorControl": "LOCK" }, waitExecution);
     }
 
     async unlockDoors(vin: string, waitExecution: boolean = false): Promise<RemoteServiceResponse> {
+        this.logger?.LogInformation("Unlocking doors");
         return await this.executeService(vin, RemoteServices.UnlockDoors, { "clientId": 2, "doorSelection": "COMPLETE" }, waitExecution);
     }
 
     async startClimateControl(vin: string, waitExecution: boolean = false): Promise<RemoteServiceResponse> {
+        this.logger?.LogInformation("Start Climate Control");
         return await this.executeService(vin, RemoteServices.ClimateNow, { "rcnAction": "START" }, waitExecution);
     }
 
     async stopClimateControl(vin: string, waitExecution: boolean = false): Promise<RemoteServiceResponse> {
+        this.logger?.LogInformation("Stop Climate Control");
         return await this.executeService(vin, RemoteServices.ClimateNow, { "rcnAction": "STOP" }, waitExecution);
     }
 
@@ -51,6 +60,7 @@ export class ConnectedDrive {
     }
 
     async blowHorn(vin: string, waitExecution: boolean = false): Promise<RemoteServiceResponse> {
+        this.logger?.LogInformation("Blow Horn");
         return await this.executeService(vin, RemoteServices.BlowHorn, { "number": 2, "pause": 1, "duration": 1 }, waitExecution);
     }
 
@@ -103,9 +113,16 @@ export class ConnectedDrive {
             body: requestBodyContent,
             headers: headers
         });
+
+
+        const responseString = await response.text();
+        
+        this.logger?.LogTrace(`Request: ${url}, Method: ${httpMethod}, Headers: ${JSON.stringify(headers)}, Body: ${requestBodyContent}`);
+        this.logger?.LogTrace(`Response: ${response.status}, Headers: ${JSON.stringify(response.headers)}, Body: ${responseString}`);
+
         if (!response.ok) {
-            throw new Error(`Error occurred while attempting '${httpMethod}' at url '${url}' with ${response.status} body (${requestBodyContent})\n${await response.text()}\n${JSON.stringify(response)}`);
+            throw new Error(`Error occurred while attempting '${httpMethod}' at url '${url}' with ${response.status} body (${requestBodyContent})\n${responseString}`);
         }
-        return await response.json();
+        return JSON.parse(responseString);
     }
 }

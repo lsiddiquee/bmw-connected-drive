@@ -4,6 +4,7 @@ import { Token } from "./Token"
 import { fetch } from 'cross-fetch';
 import { ITokenStore } from "./ITokenStore";
 import { LocalTokenStore } from "./LocalTokenStore";
+import { ILogger } from "./ILogger";
 
 export class Account {
 
@@ -12,20 +13,25 @@ export class Account {
     region: Regions;
     token?: Token;
     tokenStore?: ITokenStore;
+    logger?: ILogger;
 
-    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore) {
+    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger) {
         this.username = username;
         this.password = password;
         this.region = region;
         this.tokenStore = tokenStore ?? new LocalTokenStore();
+        this.logger = logger;
     }
 
     async getToken(): Promise<Token> {
         if (!this.token && this.tokenStore) {
+            this.logger?.LogDebug("Attempting retreiving token from token store.");
             this.token = this.tokenStore.retrieveToken() as Token;
         }
         if (this.token && new Date() > this.token.validUntil) {
+            this.logger?.LogDebug("Token expired.");
             if (this.token.refreshToken) {
+                this.logger?.LogDebug("Attempting refreshing.");
                 try {
                     const refreshToken = this.token.refreshToken;
                     this.token = undefined;
@@ -42,6 +48,7 @@ export class Account {
             }
         }
         if (!this.token || !this.token?.accessToken) {
+            this.logger?.LogDebug("Getting token from token endpoint.");
             this.token = await this.retrieveToken({
                 "grant_type": "password",
                 "username": this.username,
@@ -70,11 +77,15 @@ export class Account {
             }
         });
 
+        const responseString = await serverResponse.text();
+
         if (!serverResponse.ok) {
-            return undefined;
+            this.logger?.LogError(`${serverResponse.status}: Error occurred while attempting to retrieve token. Server response: ${responseString}`);
+            throw new Error(`${serverResponse.status}: Error occurred while attempting to retrieve token.`);
         }
 
-        const responseString = await serverResponse.text();
+        this.logger?.LogTrace(`Token response: ${responseString}`);
+
         const data = JSON.parse(responseString);
         this.token = {
             response: responseString,
@@ -84,6 +95,7 @@ export class Account {
         };
 
         if (this.tokenStore) {
+            this.logger?.LogDebug("Storing token in token store.");
             this.tokenStore.storeToken(this.token);
         }
 
