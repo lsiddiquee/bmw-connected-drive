@@ -103,14 +103,14 @@ export class VehicleStatus {
         }
     }) {
         this.unitOfLength = response.attributesMap.unitOfLength;
-        this.mileage = parseInt(response.attributesMap.mileage) || undefined;
-        this.remainingFuel = parseInt(response.attributesMap.remaining_fuel) || undefined;
+        this.mileage = this.toInteger(response.attributesMap.mileage);
+        this.remainingFuel = this.toInteger(response.attributesMap.remaining_fuel);
         this.doorLockState = response.attributesMap.door_lock_state;
-        this.remainingRange = parseInt(response.attributesMap.remaining_range) || undefined;
+        this.remainingRange = this.toInteger(response.attributesMap.remaining_range);
         this.chargingStatus = response.attributesMap.charging_status;
-        this.socHvPercent = parseInt(response.attributesMap.soc_hv_percent) || undefined;
-        this.chargingLevelHv = parseInt(response.attributesMap.chargingLevelHv) || undefined;
-        this.beRemainingRangeElectric = parseInt(response.attributesMap.beRemainingRangeElectric) || undefined;
+        this.socHvPercent = this.toInteger(response.attributesMap.soc_hv_percent);
+        this.chargingLevelHv = this.toInteger(response.attributesMap.chargingLevelHv);
+        this.beRemainingRangeElectric = this.toInteger(response.attributesMap.beRemainingRangeElectric);
         if (this.remainingRange && this.beRemainingRangeElectric) {
             this.beRemainingRangeFuel = this.remainingRange - this.beRemainingRangeElectric;
         }
@@ -118,43 +118,53 @@ export class VehicleStatus {
         this.updateTimeConverted = response.attributesMap.updateTime_converted ? new Date(response.attributesMap.updateTime_converted) : undefined;
         this.doorDriverRear = response.attributesMap.door_driver_rear;
         this.doorPassengerRear = response.attributesMap.door_passenger_rear;
-        this.beRemainingRangeFuelKm = parseInt(response.attributesMap.beRemainingRangeFuelKm) || undefined;
+        this.beRemainingRangeFuelKm = this.toInteger(response.attributesMap.beRemainingRangeFuelKm);
         this.doorDriverFront = response.attributesMap.door_driver_front;
         this.hoodState = response.attributesMap.hood_state;
-        this.kombiCurrentRemainingRangeFuel = parseInt(response.attributesMap.kombi_current_remaining_range_fuel) || undefined;
+        this.kombiCurrentRemainingRangeFuel = this.toInteger(response.attributesMap.kombi_current_remaining_range_fuel);
         this.windowDriverRear = response.attributesMap.window_driver_rear;
-        this.beRemainingRangeElectricKm = parseInt(response.attributesMap.beRemainingRangeElectricKm) || undefined;
+        this.beRemainingRangeElectricKm = this.toInteger(response.attributesMap.beRemainingRangeElectricKm);
         this.unitOfEnergy = response.attributesMap.unitOfEnergy;
-        this.overallEnergyConsumption = parseFloat(response.attributesMap.overall_energy_consumption) || undefined;
+        this.overallEnergyConsumption = this.toFloat(response.attributesMap.overall_energy_consumption);
         this.singleImmediateCharging = response.attributesMap.single_immediate_charging ? response.attributesMap.single_immediate_charging === "true" : undefined;
         this.updateTimeConvertedTime = response.attributesMap.updateTime_converted_time ? new Date(response.attributesMap.updateTime_converted_time) : undefined;
         this.connectorStatus = response.attributesMap.connectorStatus;
         this.chargingHVStatus = response.attributesMap.chargingHVStatus;
         this.unitOfCombustionConsumption = response.attributesMap.unitOfCombustionConsumption;
-        this.gpsLat = parseFloat(response.attributesMap.gps_lat) || undefined;
+        this.gpsLat = this.toFloat(response.attributesMap.gps_lat);
         this.windowDriverFront = response.attributesMap.window_driver_front;
-        this.gpsLng = parseFloat(response.attributesMap.gps_lng) || undefined;
+        this.gpsLng = this.toFloat(response.attributesMap.gps_lng);
         this.conditionBasedServices = response.attributesMap.condition_based_services;
         this.windowPassengerFront = response.attributesMap.window_passenger_front;
         this.windowPassengerRear = response.attributesMap.window_passenger_rear;
         this.lastChargingEndReason = response.attributesMap.lastChargingEndReason;
         this.updateTimeConvertedDate = response.attributesMap.updateTime_converted_date ? new Date(response.attributesMap.updateTime_converted_date) : undefined;
-        this.beRemainingRangeFuelMile = parseInt(response.attributesMap.beRemainingRangeFuelMile) || undefined;
+        this.beRemainingRangeFuelMile = this.toInteger(response.attributesMap.beRemainingRangeFuelMile);
         this.doorPassengerFront = response.attributesMap.door_passenger_front;
-        this.beChargingLevelHv = parseFloat(response.attributesMap.beChargingLevelHv) || undefined;
-        this.updateTimeConvertedTimestamp = parseInt(response.attributesMap.updateTime_converted_timestamp) || undefined;
-        this.heading = parseInt(response.attributesMap.heading) || undefined;
+        this.beChargingLevelHv = this.toFloat(response.attributesMap.beChargingLevelHv);
+        this.updateTimeConvertedTimestamp = this.toInteger(response.attributesMap.updateTime_converted_timestamp);
+        this.heading = this.toInteger(response.attributesMap.heading);
         this.lscTrigger = response.attributesMap.lsc_trigger;
         this.lightsParking = response.attributesMap.lights_parking;
         this.updateTime = response.attributesMap.updateTime ? new Date(response.attributesMap.updateTime) : undefined;
-        this.beEnergyLevelHv = parseFloat(response.attributesMap.beEnergyLevelHv) || undefined;
+        this.beEnergyLevelHv = this.toFloat(response.attributesMap.beEnergyLevelHv);
         this.trunkState = response.attributesMap.trunk_state;
-        this.batterySizeMax = parseFloat(response.attributesMap.battery_size_max) || undefined;
-        this.beRemainingRangeElectricMile = parseInt(response.attributesMap.beRemainingRangeElectricMile) || undefined;
+        this.batterySizeMax = this.toFloat(response.attributesMap.battery_size_max);
+        this.beRemainingRangeElectricMile = this.toInteger(response.attributesMap.beRemainingRangeElectricMile);
         this.chargingConnectionType = response.attributesMap.charging_connection_type;
         this.unitOfElectricConsumption = response.attributesMap.unitOfElectricConsumption;
         this.lastUpdateReason = response.attributesMap.lastUpdateReason;
 
         //this.beRemainingRangeFuel
+    }
+
+    toInteger(string: string) : number | undefined {
+        const value = parseInt(string);
+        return isNaN(value) ? undefined : value;
+    }
+
+    toFloat(string: string) : number | undefined {
+        const value = parseFloat(string);
+        return isNaN(value) ? undefined : value;
     }
 }
