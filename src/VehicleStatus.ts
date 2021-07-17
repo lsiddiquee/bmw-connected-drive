@@ -111,10 +111,7 @@ export class VehicleStatus {
         this.socHvPercent = this.toInteger(response.attributesMap.soc_hv_percent);
         this.chargingLevelHv = this.toInteger(response.attributesMap.chargingLevelHv);
         this.beRemainingRangeElectric = this.toInteger(response.attributesMap.beRemainingRangeElectric);
-        if (this.remainingRange && this.beRemainingRangeElectric) {
-            this.beRemainingRangeFuel = this.remainingRange - this.beRemainingRangeElectric;
-        }
-
+        this.beRemainingRangeFuel = this.toInteger(response.attributesMap.beRemainingRangeFuel);
         this.updateTimeConverted = response.attributesMap.updateTime_converted ? new Date(response.attributesMap.updateTime_converted) : undefined;
         this.doorDriverRear = response.attributesMap.door_driver_rear;
         this.doorPassengerRear = response.attributesMap.door_passenger_rear;
