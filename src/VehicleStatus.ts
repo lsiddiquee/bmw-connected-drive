@@ -111,14 +111,21 @@ export class VehicleStatus {
         this.socHvPercent = this.toInteger(response.attributesMap.soc_hv_percent);
         this.chargingLevelHv = this.toInteger(response.attributesMap.chargingLevelHv);
         this.beRemainingRangeElectric = this.toInteger(response.attributesMap.beRemainingRangeElectric);
-        this.beRemainingRangeFuel = this.toInteger(response.attributesMap.beRemainingRangeFuel);
+
+        // The remaining fuel range should be calculated as PHEV/BEV returns full range not fuel only.
+        this.beRemainingRangeFuel = this.remainingRange;
+        if (!isNaN(this.remainingRange!) && !isNaN(this.beRemainingRangeElectric!)) {
+            this.beRemainingRangeFuel! -= this.beRemainingRangeElectric!;
+        }
+        this.kombiCurrentRemainingRangeFuel = this.beRemainingRangeFuel;
+        // this.beRemainingRangeFuelKm = this.toInteger(response.attributesMap.beRemainingRangeFuelKm);
+        // this.beRemainingRangeFuelMile = this.toInteger(response.attributesMap.beRemainingRangeFuelMile);
+
         this.updateTimeConverted = response.attributesMap.updateTime_converted ? new Date(response.attributesMap.updateTime_converted) : undefined;
         this.doorDriverRear = response.attributesMap.door_driver_rear;
         this.doorPassengerRear = response.attributesMap.door_passenger_rear;
-        this.beRemainingRangeFuelKm = this.toInteger(response.attributesMap.beRemainingRangeFuelKm);
         this.doorDriverFront = response.attributesMap.door_driver_front;
         this.hoodState = response.attributesMap.hood_state;
-        this.kombiCurrentRemainingRangeFuel = this.toInteger(response.attributesMap.kombi_current_remaining_range_fuel);
         this.windowDriverRear = response.attributesMap.window_driver_rear;
         this.beRemainingRangeElectricKm = this.toInteger(response.attributesMap.beRemainingRangeElectricKm);
         this.unitOfEnergy = response.attributesMap.unitOfEnergy;
@@ -136,7 +143,6 @@ export class VehicleStatus {
         this.windowPassengerRear = response.attributesMap.window_passenger_rear;
         this.lastChargingEndReason = response.attributesMap.lastChargingEndReason;
         this.updateTimeConvertedDate = response.attributesMap.updateTime_converted_date ? new Date(response.attributesMap.updateTime_converted_date) : undefined;
-        this.beRemainingRangeFuelMile = this.toInteger(response.attributesMap.beRemainingRangeFuelMile);
         this.doorPassengerFront = response.attributesMap.door_passenger_front;
         this.beChargingLevelHv = this.toFloat(response.attributesMap.beChargingLevelHv);
         this.updateTimeConvertedTimestamp = this.toInteger(response.attributesMap.updateTime_converted_timestamp);
@@ -151,8 +157,6 @@ export class VehicleStatus {
         this.chargingConnectionType = response.attributesMap.charging_connection_type;
         this.unitOfElectricConsumption = response.attributesMap.unitOfElectricConsumption;
         this.lastUpdateReason = response.attributesMap.lastUpdateReason;
-
-        //this.beRemainingRangeFuel
     }
 
     toInteger(string: string) : number | undefined {
