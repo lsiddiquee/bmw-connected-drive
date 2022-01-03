@@ -14,16 +14,5 @@ import {ServiceStatus} from "./ServiceStatus"
 import {DetailedServiceStatus} from "./DetailedServiceStatus"
 import {RemoteServiceExecutionState} from "./RemoteServiceExecutionState"
 import {RemoteServiceExecutionStateDetailed} from "./RemoteServiceExecutionStateDetailed"
-import {LocalTokenStore} from "./LocalTokenStore";
-import {ConsoleLogger} from "./ConsoleLogger";
 
 export { LogLevel, ILogger, LoggerBase, ITokenStore, Token, Regions, Account, ConnectedDrive, Vehicle, VehicleStatus, RemoteServices, RemoteServiceResponse, ServiceStatus, DetailedServiceStatus, RemoteServiceExecutionState, RemoteServiceExecutionStateDetailed }
-
-const connectedDrive = new ConnectedDrive("likhan_s@hotmail.com", "sYL9r30r2MZj", Regions.RestOfWorld, new LocalTokenStore(), new ConsoleLogger());
-connectedDrive.account.getToken().then(token => {
-   console.log(token);
-   connectedDrive.getVehicles().then(vehicles =>{
-      vehicles.forEach(v => console.log(v.vin));
-   });   
-});
-
