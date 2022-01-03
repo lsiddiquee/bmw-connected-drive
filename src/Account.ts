@@ -47,8 +47,7 @@ export class Account {
                 } catch {
                     // Intentional empty catch, as if the refresh failed, we can attempt a normal token retrieval.
                 }
-            }
-            else {
+            } else {
                 this.token = undefined;
             }
         }
@@ -83,10 +82,10 @@ export class Account {
         let data = await serverResponse.json();
         const clientId = data.clientId;
         const clientSecret = data.clientSecret;
-        const code_verifier = crypto.randomBytes(64).toString('base64url');
+        const code_verifier = Account.base64UrlEncode(crypto.randomBytes(64));
         const hash = crypto.createHash('sha256');
-        const code_challenge = hash.update(code_verifier).digest().toString('base64url');
-        const state = crypto.randomBytes(16).toString('base64url');
+        const code_challenge = Account.base64UrlEncode(hash.update(code_verifier).digest());
+        const state = Account.base64UrlEncode(crypto.randomBytes(16));
         const authenticateUrl = `${data.gcdmBaseUrl}/gcdm/oauth/authenticate`;
         const tokenUrl = data.tokenEndpoint;
         const returnUrl = data.returnUrl;
@@ -130,7 +129,7 @@ export class Account {
             redirect: "manual",
             credentials: "same-origin"
         }, response => response.status === 302);
-        
+
         const nextUrl = serverResponse.headers.get("location") as string;
         this.logger?.LogTrace(nextUrl);
         const code = Account.getQueryStringValue(nextUrl, "code");
@@ -152,9 +151,9 @@ export class Account {
             },
             credentials: "same-origin"
         }, response => response.ok);
-        
+
         data = await serverResponse.json();
-        
+
         this.token = {
             response: JSON.stringify(data),
             accessToken: data.access_token,
@@ -173,7 +172,7 @@ export class Account {
     private async executeFetchWithRetry(url: string, init: any, responseValidator: (response: Response) => boolean): Promise<Response> {
         let response: Response;
         let retryCount = 0;
-        
+
         do {
             response = await fetch(url, init);
             retryCount++;
@@ -183,13 +182,13 @@ export class Account {
             this.logger?.LogError(`${response.status}: Error occurred while attempting to retrieve token. Server response: ${(await response.text())}`);
             throw new Error(`${response.status}: Error occurred while attempting to retrieve token.`);
         }
-        
+
         return response;
     }
 
-    private async delay(ms: number) : Promise<boolean> {
+    private async delay(ms: number): Promise<boolean> {
         this.logger?.LogTrace("Sleeping for retry.")
-        await new Promise( resolve => setTimeout(resolve, ms) );
+        await new Promise(resolve => setTimeout(resolve, ms));
         return true;
     }
 
@@ -208,4 +207,9 @@ export class Account {
         }
 
         throw new Error(`Url: '${url}' does not contain parameter '${queryParamName}'.`);
-    }}
+    }
+    
+    private static base64UrlEncode(buffer: Buffer):string{
+        return buffer.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+}
