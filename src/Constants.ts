@@ -3,21 +3,21 @@ import { Regions } from "./Regions"
 type EndpointMap = { [P in Regions]: string }
 
 export class Constants {
-    static readonly OAuthEndpoints: EndpointMap = {
-        NorthAmerica: "b2vapi.bmwgroup.us/gcdm",
-        RestOfWorld: "customer.bmwgroup.com/gcdm",
-        China: "customer.bmwgroup.cn/gcdm"
-    }
-
-    static readonly ServerEndpoints: EndpointMap = {
+    static readonly LegacyServerEndpoints: EndpointMap = {
         NorthAmerica: "b2vapi.bmwgroup.us",
         RestOfWorld: "b2vapi.bmwgroup.com",
         China: "b2vapi.bmwgroup.cn:8592"
     }
 
-    static readonly OAuthAuthorization: EndpointMap = {
-        NorthAmerica: "ZDc2NmI1MzctYTY1NC00Y2JkLWEzZGMtMGNhNTY3MmQ3ZjhkOjE1ZjY5N2Y2LWE1ZDUtNGNhZC05OWQ5LTNhMTViYzdmMzk3Mw==",
-        RestOfWorld: "ZDc2NmI1MzctYTY1NC00Y2JkLWEzZGMtMGNhNTY3MmQ3ZjhkOjE1ZjY5N2Y2LWE1ZDUtNGNhZC05OWQ5LTNhMTViYzdmMzk3Mw==",
+    static readonly ServerEndpoints: EndpointMap = {
+        NorthAmerica: "cocoapi.bmwgroup.us",
+        RestOfWorld: "cocoapi.bmwgroup.com",
+        China: "myprofile.bmw.com.cn"
+    }
+
+    static readonly OAuthAuthorizationKey: EndpointMap = {
+        NorthAmerica: "31e102f5-6f7e-7ef3-9044-ddce63891362",
+        RestOfWorld: "4f1c85a3-758f-a37d-bbb6-f8704494acfa",
         China: "blF2NkNxdHhKdVhXUDc0eGYzQ0p3VUVQOjF6REh4NnVuNGNEanliTEVOTjNreWZ1bVgya0VZaWdXUGNRcGR2RFJwSUJrN3JPSg=="
     }
 
