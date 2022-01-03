@@ -23,13 +23,13 @@ export class ConnectedDrive {
 
     async getVehicles(): Promise<Vehicle[]> {
         this.logger?.LogInformation("Getting vehicles");
-        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}/webapi/v1/user/vehicles`;
+        const url: string = `https://${Constants.LegacyServerEndpoints[this.account.region]}/webapi/v1/user/vehicles`;
         return (await this.request(url)).vehicles;
     }
 
     async getVehicleStatus(vin: string): Promise<VehicleStatus> {
         this.logger?.LogInformation("Getting vehicle status.");
-        let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicleStatus}`;
+        let url: string = `https://${Constants.LegacyServerEndpoints[this.account.region]}${Constants.getVehicleStatus}`;
         url = url.replace("{vehicleVin}", vin);
 
         return new VehicleStatus(await this.request(url));
@@ -65,7 +65,7 @@ export class ConnectedDrive {
     }
 
     private async executeService(vin: string, serviceType: RemoteServices, requestBody: any, waitExecution: boolean): Promise<RemoteServiceResponse> {
-        let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.executeRemoteServices}`;
+        let url: string = `https://${Constants.LegacyServerEndpoints[this.account.region]}${Constants.executeRemoteServices}`;
         url = url.replace("{vehicleVin}", vin);
         url = url.replace("{serviceType}", serviceType);
         const response = new RemoteServiceResponse(await this.request(url, true, requestBody));
@@ -83,14 +83,14 @@ export class ConnectedDrive {
     }
 
     async getServiceStatus(vin: string): Promise<ServiceStatus> {
-        let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.statusRemoteServices}`;
+        let url: string = `https://${Constants.LegacyServerEndpoints[this.account.region]}${Constants.statusRemoteServices}`;
         url = url.replace("{vehicleVin}", vin);
 
         return new ServiceStatus(await this.request(url));
     }
 
     async sendMessage(vin: string, subject: string, message: string): Promise<boolean> {
-        let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.sendMessage}`;
+        let url: string = `https://${Constants.LegacyServerEndpoints[this.account.region]}${Constants.sendMessage}`;
         const requestBody = {"vins": [vin], "message": message, "subject": subject};
 
         return (await this.request(url, true, requestBody))?.status === "OK";
@@ -100,9 +100,10 @@ export class ConnectedDrive {
         const httpMethod = isPost ? "POST" : "GET";
         const requestBodyContent = requestBody ? JSON.stringify(requestBody) : null;
         const headers : any = {
+            "accept": "application/json",
             "Content-Type": "application/json;charset=UTF-8",
             "Authorization": `Bearer ${(await this.account.getToken()).accessToken}`,
-            "Referer": "https://www.bmw-connecteddrive.nl/app/index.html"
+            "x-user-agent": "android(v1.07_20200330);bmw;1.7.0(11152)"
         }
         if (requestBodyContent) {
             headers.Accept = "application/json;charset=utf-8";
@@ -111,7 +112,8 @@ export class ConnectedDrive {
         const response = await fetch(url, {
             method: httpMethod,
             body: requestBodyContent,
-            headers: headers
+            headers: headers,
+            credentials: "same-origin"
         });
 
 
