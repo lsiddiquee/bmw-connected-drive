@@ -10,6 +10,7 @@ import { RemoteServiceExecutionState } from "./RemoteServiceExecutionState";
 import { Regions } from "./Regions";
 import { ITokenStore } from "./ITokenStore";
 import { ILogger } from "./ILogger";
+import {v4 as uuidv4} from 'uuid';
 
 export class ConnectedDrive {
     serviceExecutionStatusCheckInterval = 5000;
@@ -23,7 +24,8 @@ export class ConnectedDrive {
 
     async getVehicles(): Promise<Vehicle[]> {
         this.logger?.LogInformation("Getting vehicles");
-        const url: string = `https://${Constants.LegacyServerEndpoints[this.account.region]}/webapi/v1/user/vehicles`;
+        const params = `apptimezone=${120}&appDateTime=${Date.now()}&tireGuardMode=ENABLED`;
+        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}/eadrax-vcs/v1/vehicles?${params}`;
         return (await this.request(url)).vehicles;
     }
 
@@ -97,14 +99,21 @@ export class ConnectedDrive {
     }
 
     async request(url: string, isPost: boolean = false, requestBody?: any): Promise<any> {
+        const correlationId = uuidv4();
         const httpMethod = isPost ? "POST" : "GET";
         const requestBodyContent = requestBody ? JSON.stringify(requestBody) : null;
         const headers : any = {
             "accept": "application/json",
+            "accept-language": "en",
             "Content-Type": "application/json;charset=UTF-8",
             "Authorization": `Bearer ${(await this.account.getToken()).accessToken}`,
-            "x-user-agent": "android(v1.07_20200330);bmw;1.7.0(11152)"
-        }
+            "user-agent": Constants.User_Agent,
+            "x-user-agent": Constants.X_User_Agent[this.account.region],
+            "x-identity-provider": "gcdm",
+            "bmw-session-id": correlationId,
+            "x-correlation-id": correlationId,
+            "bmw-correlation-id": correlationId            
+    }
         if (requestBodyContent) {
             headers.Accept = "application/json;charset=utf-8";
         }
@@ -118,6 +127,8 @@ export class ConnectedDrive {
 
 
         const responseString = await response.text();
+        console.log(responseString);
+        
         
         this.logger?.LogTrace(`Request: ${url}, Method: ${httpMethod}, Headers: ${JSON.stringify(headers)}, Body: ${requestBodyContent}`);
         this.logger?.LogTrace(`Response: ${response.status}, Headers: ${JSON.stringify(response.headers)}, Body: ${responseString}`);

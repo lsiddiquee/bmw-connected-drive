@@ -21,6 +21,13 @@ export class Constants {
         China: "blF2NkNxdHhKdVhXUDc0eGYzQ0p3VUVQOjF6REh4NnVuNGNEanliTEVOTjNreWZ1bVgya0VZaWdXUGNRcGR2RFJwSUJrN3JPSg=="
     }
 
+    static readonly User_Agent: string = "Dart/2.14 (dart:io)";
+    static readonly X_User_Agent: EndpointMap = {
+        NorthAmerica: "android(SP1A.210812.016.C1);bmw;2.5.2(14945);na",
+        RestOfWorld: "android(SP1A.210812.016.C1);bmw;2.5.2(14945);row",
+        China: "android(SP1A.210812.016.C1);bmw;2.3.0(13603);cn"
+    }
+
     static readonly getVehicles: string = "/webapi/v1/user/vehicles";
     static readonly getVehicleStatus: string = "/api/vehicle/dynamic/v1/{vehicleVin}";
     static readonly executeRemoteServices: string = "/remoteservices/rsapi/v1/{vehicleVin}/{serviceType}";
