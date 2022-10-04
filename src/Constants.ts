@@ -22,7 +22,7 @@ export class Constants {
         China: "android(SP1A.210812.016.C1);bmw;2.3.0(13603);cn"
     }
 
-    static readonly getVehicles: string = "/eadrax-vcs/v1/vehicles";
+    static readonly getVehicles: string = "/eadrax-vcs/v2/vehicles";
     static readonly remoteServicesBaseUrl: string = "/eadrax-vrccs/v2/presentation/remote-commands";
     static readonly executeRemoteServices: string =  Constants.remoteServicesBaseUrl + "/{vehicleVin}/{serviceType}";
     static readonly statusRemoteServices: string = Constants.remoteServicesBaseUrl + "/eventStatus?eventId={eventId}";
