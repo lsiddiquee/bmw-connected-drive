@@ -1,16 +1,14 @@
 export enum RemoteServices {
     /** climate */
-    ClimateNow = "RCN",
+    ClimateNow = "climate-now",
     /** lock */
-    LockDoors = "RDL",
+    LockDoors = "door-lock",
     /** unlock */
-    UnlockDoors = "RDU",
+    UnlockDoors = "door-unlock",
     /** horn */
-    BlowHorn = "RHB",
+    BlowHorn = "horn-blow",
     /** light */
-    FlashLight = "RLF",
-    /** Climate timer */
-    ClimateTimer = "RCT",
-    /** Charging profile */
-    ChargingProfile = "RCP"
+    FlashLight = "light-flash",
+    /** charge now */
+    ChargeNow = "CHARGE_NOW"
 }

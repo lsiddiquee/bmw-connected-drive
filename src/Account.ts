@@ -4,6 +4,7 @@ import { Token } from "./Token"
 import { ITokenStore } from "./ITokenStore";
 import { LocalTokenStore } from "./LocalTokenStore";
 import { ILogger } from "./ILogger";
+import {v4 as uuidv4} from 'uuid';
 
 import crypto from "crypto";
 import {URLSearchParams} from "url";
@@ -73,8 +74,7 @@ export class Account {
         let serverResponse = await this.executeFetchWithRetry(authSettingsUrl, {
             method: "GET",
             headers: {
-                "ocp-apim-subscription-key": Constants.OAuthAuthorizationKey[this.region],
-                "x-user-agent": "android(v1.07_20200330);bmw;1.7.0(11152)"
+                "ocp-apim-subscription-key": Constants.OAuthAuthorizationKey[this.region]
             },
             credentials: "same-origin"
         }, response => response.ok);
@@ -170,8 +170,15 @@ export class Account {
     }
 
     private async executeFetchWithRetry(url: string, init: any, responseValidator: (response: Response) => boolean): Promise<Response> {
+        const correlationId = uuidv4();
         let response: Response;
         let retryCount = 0;
+        init.headers["user-agent"] = Constants.User_Agent;
+        init.headers["x-user-agent"] = Constants.X_User_Agent[this.region];
+        init.headers["x-identity-provider"] = "gcdm";
+        init.headers["bmw-session-id"] = correlationId;
+        init.headers["x-correlation-id"] = correlationId;
+        init.headers["bmw-correlation-id"] = correlationId;
 
         do {
             response = await fetch(url, init);
