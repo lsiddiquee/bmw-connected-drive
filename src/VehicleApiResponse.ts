@@ -1,157 +1,163 @@
-export interface LastStateCall {
-    isNonLscFeatureEnabled: boolean;
-    lscState: string;
+export interface Vehicle {
+    vin:            string;
+    mappingInfo:    MappingInfo;
+    appVehicleType: string;
+    attributes:     Attributes;
 }
 
-export interface ExecutionPopup {
-    executionMessage: string;
-    popupType: string;
-    title: string;
-    primaryButtonText: string;
-    secondaryButtonText: string;
-    iconId: number;
+export interface Attributes {
+    lastFetched:              Date;
+    model:                    string;
+    year:                     number;
+    color:                    number;
+    brand:                    string;
+    driveTrain:               string;
+    headUnitType:             string;
+    headUnitRaw:              string;
+    hmiVersion:               string;
+    softwareVersionCurrent:   SoftwareVersion;
+    softwareVersionExFactory: SoftwareVersion;
+    telematicsUnit:           string;
+    bodyType:                 string;
+    countryOfOrigin:          string;
+    a4aType:                  string;
+    driverGuideInfo:          DriverGuideInfo;
 }
 
-export interface ExecutionStopPopup {
-    executionMessage: string;
-    title: string;
+export interface DriverGuideInfo {
+    androidAppScheme: string;
+    iosAppScheme:     string;
+    androidStoreUrl:  string;
+    iosStoreUrl:      string;
 }
 
-export interface CapabilityInfo {
-    isEnabled: boolean;
-    isPinAuthenticationRequired: boolean;
-    executionMessage: string;
-    executionPopup: ExecutionPopup;
-    executionStopPopup: ExecutionStopPopup;
+export interface SoftwareVersion {
+    puStep:        PuStep;
+    iStep:         number;
+    seriesCluster: string;
 }
 
-export interface Remote360 {
-    isEnabled: boolean;
-    isToggleEnabled: boolean;
-    isComingSoonEnabled: boolean;
-    isPinAuthenticationRequired: boolean;
-    isDataPrivacyEnabled: boolean;
+export interface PuStep {
+    month: number;
+    year:  number;
 }
 
-export interface Capabilities {
-    isRemoteServicesBookingRequired: boolean;
-    isRemoteServicesActivationRequired: boolean;
-    lock: CapabilityInfo;
-    unlock: CapabilityInfo;
-    lights: CapabilityInfo;
-    horn: CapabilityInfo;
-    vehicleFinder: CapabilityInfo;
-    sendPoi: CapabilityInfo;
-    lastStateCall: LastStateCall;
-    climateNow: CapabilityInfo;
-    isRemoteHistorySupported: boolean;
-    canRemoteHistoryBeDeleted: boolean;
-    remote360: Remote360;
-    isChargingHistorySupported: boolean;
-    isScanAndChargeSupported: boolean;
-    isDCSContractManagementSupported: boolean;
-    isBmwChargingSupported: boolean;
-    isMiniChargingSupported: boolean;
-    isChargeNowForBusinessSupported: boolean;
-    isDataPrivacyEnabled: boolean;
-    isChargingPlanSupported: boolean;
-    isChargingPowerLimitEnable: boolean;
-    isChargingTargetSocEnable: boolean;
-    isChargingLoudnessEnable: boolean;
-    isChargingSettingsEnabled: boolean;
-    isChargingHospitalityEnabled: boolean;
-    isEvGoChargingSupported: boolean;
-    isFindChargingEnabled: boolean;
-    isCustomerEsimSupported: boolean;
-    isCarSharingSupported: boolean;
-    isEasyChargeSupported: boolean;
-    isSustainabilitySupported: boolean;
-    specialThemeSupport: any[];
-    isRemoteParkingSupported: boolean;
+export interface MappingInfo {
+    isAssociated:  boolean;
+    isLmmEnabled:  boolean;
+    mappingStatus: string;
+    isPrimaryUser: boolean;
 }
 
-export interface Doors {
-    driverFront: string;
-    driverRear: string;
-    passengerFront: string;
-    passengerRear: string;
+export interface VehicleStatus {
+    isLeftSteering:        boolean;
+    lastFetched:           Date;
+    lastUpdatedAt:         Date;
+    isLscSupported:        boolean;
+    range:                 number;
+    doorsState:            DoorsState;
+    windowsState:          WindowsState;
+    tireState:             TireStatuses;
+    location:              LocationInfo;
+    currentMileage:        number;
+    climateControlState:   ClimateControlState;
+    requiredServices:      RequiredService[];
+    checkControlMessages:  CheckControlMessage[];
+    chargingProfile:       ChargingProfile;
+    electricChargingState: ElectricChargingState;
+    combustionFuelLevel:   CombustionFuelLevel;
+    driverPreferences:     DriverPreferences;
+    isDeepSleepModeActive: boolean;
+    climateTimers:         ClimateTimer[];
 }
 
-export interface Windows {
-    driverFront: string;
-    driverRear: string;
-    passengerFront: string;
-    passengerRear: string;
+export interface ChargingProfile {
+    chargingControlType:      string;
+    reductionOfChargeCurrent: ReductionOfChargeCurrent;
+    chargingMode:             string;
+    chargingPreference:       string;
+    departureTimes:           DepartureTime[];
+    climatisationOn:          boolean;
+    chargingSettings:         ChargingSettings;
 }
 
-export interface DoorsAndWindows {
-    doors: Doors;
-    windows: Windows;
-    trunk: string;
-    hood: string;
+export interface ChargingSettings {
+    targetSoc:   number;
+    idcc:        string;
+    hospitality: string;
 }
 
-export interface TireStatusInfo {
-    currentPressure: number;
-    localizedCurrentPressure: string;
-    targetPressure: number;
-    localizedTargetPressure: string;
+export interface DepartureTime {
+    id:            number;
+    timeStamp:     Time;
+    action:        string;
+    timerWeekDays: string[];
 }
 
-export interface TireStatus {
-    status: TireStatusInfo;
+export interface Time {
+    hour:   number;
+    minute: number;
 }
 
-export interface Tires {
-    frontLeft: TireStatus;
-    frontRight: TireStatus;
-    rearLeft: TireStatus;
-    rearRight: TireStatus;
+export interface ReductionOfChargeCurrent {
+    start: Time;
+    end:   Time;
 }
 
-export interface FuelLevel {
-    value: number;
-    units: string;
+export interface CheckControlMessage {
+    type:     string;
+    severity: string;
 }
 
-export interface FuelPercentage {
-    value: number;
+export interface ClimateControlState {
+    activity: string;
 }
 
-export interface ChargingState {
-    chargePercentage: number;
-    state: string;
-    type: string;
-    isChargerConnected: boolean;
+export interface ClimateTimer {
+    isWeeklyTimer: boolean;
+    timerAction:   string;
+    timerWeekDays: string[];
+    departureTime: Time;
 }
 
-export interface Distance {
-    value: number;
-    units: string;
+export interface CombustionFuelLevel {
+    remainingFuelPercent: number;
+    remainingFuelLiters:  number;
+    range:                number;
 }
 
-export interface CombustionRange {
-    distance: Distance;
+export interface DoorsState {
+    combinedSecurityState: string;
+    leftFront:             string;
+    leftRear:              string;
+    rightFront:            string;
+    rightRear:             string;
+    combinedState:         string;
+    hood:                  string;
+    trunk:                 string;
 }
 
-export interface CombinedRange {
-    distance: Distance;
+export interface DriverPreferences {
+    lscPrivacyMode: string;
 }
 
-export interface ElectricRange {
-    distance: Distance;
+export interface ElectricChargingState {
+    chargingLevelPercent:   number;
+    range:                  number;
+    isChargerConnected:     boolean;
+    chargingConnectionType: string;
+    chargingStatus:         string;
+    chargingTarget:         number;
 }
 
-export interface ElectricRangeAndStatus {
-    chargePercentage: number;
-    distance: Distance;
+export interface LocationInfo {
+    coordinates: Coordinates;
+    address:     Address;
+    heading:     number;
 }
 
-export interface ServiceRequired {
-    type: string;
-    status: string;
-    dateTime: Date;
-    distance: Distance;
+export interface Address {
+    formatted: string;
 }
 
 export interface Coordinates {
@@ -159,191 +165,91 @@ export interface Coordinates {
     longitude: number;
 }
 
-export interface Address {
-    formatted: string;
-}
-
-export interface VehicleLocation {
-    coordinates: Coordinates;
-    address: Address;
-    heading: number;
-}
-
-export interface ClimateControl {
-    activity: string;
-}
-
-export interface Properties {
-    lastUpdatedAt: Date;
-    inMotion: boolean;
-    areDoorsLocked: boolean;
-    originCountryISO: string;
-    areDoorsClosed: boolean;
-    areDoorsOpen: boolean;
-    areWindowsClosed: boolean;
-    doorsAndWindows: DoorsAndWindows;
-    tires: Tires;
-    isServiceRequired: boolean;
-    fuelLevel: FuelLevel;
-    fuelPercentage: FuelPercentage;
-    chargingState: ChargingState;
-    combustionRange: CombustionRange;
-    combinedRange: CombinedRange;
-    electricRange: ElectricRange;
-    electricRangeAndStatus: ElectricRangeAndStatus;
-    checkControlMessages: any[];
-    serviceRequired: ServiceRequired[];
-    vehicleLocation: VehicleLocation;
-    climateControl: ClimateControl;
-}
-
-export interface DriverGuideInfo {
-    title: string;
-    androidAppScheme: string;
-    iosAppScheme: string;
-    androidStoreUrl: string;
-    iosStoreUrl: string;
-}
-
-export interface VehicleStatusBackgroundColor {
-    red: number;
-    green: number;
-    blue: number;
-}
-
-export interface ThemeSpecs {
-    vehicleStatusBackgroundColor: VehicleStatusBackgroundColor;
-}
-
-export interface CurrentMileage {
-    mileage: number;
-    units: string;
-    formattedMileage: string;
-}
-
-export interface Issues {
-}
-
-export interface DoorsAndWindow {
-    iconId: number;
-    title: string;
-    state: string;
-    criticalness: string;
-}
-
-export interface CheckControlMessage {
-    criticalness: string;
-    iconId: number;
-    title: string;
-    state: string;
-}
-
 export interface RequiredService {
-    id: string;
-    title: string;
-    iconId: number;
-    longDescription: string;
-    subtitle: string;
-    criticalness: string;
+    dateTime:    Date;
+    type:        string;
+    status:      string;
+    description: string;
+    mileage?:    number;
 }
 
-export interface FuelIndicator {
-    mainBarValue: number;
-    secondaryBarValue: number;
-    infoIconId: number;
-    infoLabel: string;
-    rangeIconId: number;
-    rangeUnits: string;
-    levelIconId?: number;
-    showsBar: boolean;
-    levelUnits: string;
-    levelValue: string;
-    isInaccurate: boolean;
-    isCircleIcon: boolean;
-    iconOpacity: string;
-    chargingType?: any;
-    rangeValue: string;
-    showBarGoal?: boolean;
-    barType?: any;
-    chargingStatusType: string;
-    chargingStatusIndicatorType: string;
+export interface TireStatuses {
+    frontLeft:  TireStatusInfo;
+    frontRight: TireStatusInfo;
+    rearLeft:   TireStatusInfo;
+    rearRight:  TireStatusInfo;
 }
 
-export interface TimeStamp {
-    hour: number;
-    minute: number;
+export interface TireStatusInfo {
+    status: TireStatus;
 }
 
-export interface ReductionOfChargeCurrent {
-    start: TimeStamp;
-    end: TimeStamp;
+export interface TireStatus {
+    currentPressure: number;
+    targetPressure:  number;
 }
 
-export interface DepartureTime {
-    id: number;
-    action: string;
-    timerWeekDays: string[];
-    timeStamp: TimeStamp;
+export interface WindowsState {
+    leftFront:     string;
+    leftRear:      string;
+    rightFront:    string;
+    rightRear:     string;
+    combinedState: string;
 }
 
-export interface ChargingSettings {
-    targetSoc: number;
-    isAcCurrentLimitActive: boolean;
-    hospitality: string;
-    idcc: string;
+export interface Capabilities {
+    a4aType:                                string;
+    climateNow:                             boolean;
+    climateFunction:                        string;
+    horn:                                   boolean;
+    isBmwChargingSupported:                 boolean;
+    isCarSharingSupported:                  boolean;
+    isChargeNowForBusinessSupported:        boolean;
+    isChargingHistorySupported:             boolean;
+    isChargingHospitalityEnabled:           boolean;
+    isChargingLoudnessEnabled:              boolean;
+    isChargingPlanSupported:                boolean;
+    isChargingPowerLimitEnabled:            boolean;
+    isChargingSettingsEnabled:              boolean;
+    isChargingTargetSocEnabled:             boolean;
+    isCustomerEsimSupported:                boolean;
+    isDataPrivacyEnabled:                   boolean;
+    isDCSContractManagementSupported:       boolean;
+    isEasyChargeEnabled:                    boolean;
+    isMiniChargingSupported:                boolean;
+    isEvGoChargingSupported:                boolean;
+    isRemoteHistoryDeletionSupported:       boolean;
+    isRemoteEngineStartSupported:           boolean;
+    isRemoteServicesActivationRequired:     boolean;
+    isRemoteServicesBookingRequired:        boolean;
+    isScanAndChargeSupported:               boolean;
+    lastStateCallState:                     string;
+    lights:                                 boolean;
+    lock:                                   boolean;
+    remote360:                              boolean;
+    sendPoi:                                boolean;
+    unlock:                                 boolean;
+    vehicleFinder:                          boolean;
+    vehicleStateSource:                     string;
+    isRemoteHistorySupported:               boolean;
+    isWifiHotspotServiceSupported:          boolean;
+    isNonLscFeatureEnabled:                 boolean;
+    isSustainabilitySupported:              boolean;
+    isSustainabilityAccumulatedViewEnabled: boolean;
+    checkSustainabilityDPP:                 boolean;
+    specialThemeSupport:                    any[];
+    isRemoteParkingSupported:               boolean;
+    remoteChargingCommands:                 RemoteChargingCommands;
+    isClimateTimerWeeklyActive:             boolean;
+    digitalKey:                             DigitalKey;
 }
 
-export interface ChargingProfile {
-    reductionOfChargeCurrent: ReductionOfChargeCurrent;
-    chargingMode: string;
-    chargingPreference: string;
-    chargingControlType: string;
-    departureTimes: DepartureTime[];
-    climatisationOn: boolean;
-    chargingSettings: ChargingSettings;
+export interface DigitalKey {
+    bookedServicePackage: string;
+    state:                string;
 }
 
-export interface Status {
-    lastUpdatedAt: Date;
-    currentMileage: CurrentMileage;
-    issues: Issues;
-    doorsGeneralState: string;
-    checkControlMessagesGeneralState: string;
-    doorsAndWindows: DoorsAndWindow[];
-    checkControlMessages: CheckControlMessage[];
-    requiredServices: RequiredService[];
-    recallMessages: any[];
-    recallExternalUrl?: any;
-    fuelIndicators: FuelIndicator[];
-    timestampMessage: string;
-    chargingProfile: ChargingProfile;
-}
-
-export interface Vehicle {
-    vin: string;
-    model: string;
-    year: number;
-    brand: string;
-    headUnit: string;
-    isLscSupported: boolean;
-    driveTrain: string;
-    puStep: string;
-    iStep: string;
-    telematicsUnit: string;
-    hmiVersion: string;
-    bodyType: string;
-    a4aType: string;
-    capabilities: Capabilities;
-    connectedDriveServices: string[];
-    properties: Properties;
-    isMappingPending: boolean;
-    isMappingUnconfirmed: boolean;
-    driverGuideInfo: DriverGuideInfo;
-    themeSpecs: ThemeSpecs;
-    status: Status;
-    exFactoryPUStep: string;
-    exFactoryILevel: string;
-    euiccid: string;
+export interface RemoteChargingCommands {
 }
 
 export interface RemoteServiceRequestResponse {

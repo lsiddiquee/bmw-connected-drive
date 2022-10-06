@@ -6,7 +6,7 @@ import { RemoteServiceExecutionState } from "./RemoteServiceExecutionState";
 import { Regions } from "./Regions";
 import { ITokenStore } from "./ITokenStore";
 import { ILogger } from "./ILogger";
-import { RemoteServiceRequestResponse, Vehicle } from "./VehicleApiResponse";
+import { Capabilities, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./VehicleApiResponse";
 import { v4 as uuidv4 } from 'uuid';
 
 export class ConnectedDrive {
@@ -26,11 +26,20 @@ export class ConnectedDrive {
         return (await this.request(url));
     }
 
-    async getVehicleStatus(vin: string): Promise<Vehicle> {
+    async getVehicleStatus(vin: string): Promise<VehicleStatus> {
         this.logger?.LogInformation("Getting vehicle status.");
 
-        const vehicles = await this.getVehicles();
-        return vehicles.filter(v => v.vin === vin)[0];
+        const params = `apptimezone=${120}&appDateTime=${Date.now()}&tireGuardMode=ENABLED`;
+        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}/${vin}/state?${params}`;
+        return (await this.request(url)).state;
+    }
+
+    async getVehicleCapabilities(vin: string): Promise<Capabilities> {
+        this.logger?.LogInformation("Getting vehicle status.");
+
+        const params = `apptimezone=${120}&appDateTime=${Date.now()}&tireGuardMode=ENABLED`;
+        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}/${vin}/state?${params}`;
+        return (await this.request(url)).capabilities;
     }
 
     async lockDoors(vin: string, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
