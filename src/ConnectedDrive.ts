@@ -21,7 +21,7 @@ export class ConnectedDrive {
 
     async getVehicles(): Promise<Vehicle[]> {
         this.logger?.LogInformation("Getting vehicles");
-        const params = `apptimezone=${120}&appDateTime=${Date.now()}&tireGuardMode=ENABLED`;
+        const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
         const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}?${params}`;
         return (await this.request(url));
     }
@@ -29,17 +29,17 @@ export class ConnectedDrive {
     async getVehicleStatus(vin: string): Promise<VehicleStatus> {
         this.logger?.LogInformation("Getting vehicle status.");
 
-        const params = `apptimezone=${120}&appDateTime=${Date.now()}&tireGuardMode=ENABLED`;
-        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}/${vin}/state?${params}`;
-        return (await this.request(url)).state;
+        const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
+        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}/state?${params}`;
+        return (await this.request(url, false, null, { "bmw-vin": vin })).state;
     }
 
     async getVehicleCapabilities(vin: string): Promise<Capabilities> {
-        this.logger?.LogInformation("Getting vehicle status.");
+        this.logger?.LogInformation("Getting vehicle capabilities.");
 
-        const params = `apptimezone=${120}&appDateTime=${Date.now()}&tireGuardMode=ENABLED`;
-        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}/${vin}/state?${params}`;
-        return (await this.request(url)).capabilities;
+        const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
+        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}/state?${params}`;
+        return (await this.request(url, false, null, { "bmw-vin": vin })).capabilities;
     }
 
     async lockDoors(vin: string, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
@@ -104,22 +104,22 @@ export class ConnectedDrive {
         return (await this.request(url, true, requestBody))?.status === "OK";
     }
 
-    async request(url: string, isPost: boolean = false, requestBody?: any): Promise<any> {
+    async request(url: string, isPost: boolean = false, requestBody?: any, headers: any = {}): Promise<any> {
         const correlationId = uuidv4();
         const httpMethod = isPost ? "POST" : "GET";
         const requestBodyContent = requestBody ? JSON.stringify(requestBody) : null;
-        const headers: any = {
-            "accept": "application/json",
-            "accept-language": "en",
-            "Content-Type": "application/json;charset=UTF-8",
-            "Authorization": `Bearer ${(await this.account.getToken()).accessToken}`,
-            "user-agent": Constants.User_Agent,
-            "x-user-agent": Constants.X_User_Agent[this.account.region],
-            "x-identity-provider": "gcdm",
-            "bmw-session-id": correlationId,
-            "x-correlation-id": correlationId,
-            "bmw-correlation-id": correlationId
-        }
+
+        headers["Accept"] = "application/json";
+        headers["accept-language"] = "en";
+        headers["Content-Type"] = "application/json;charset=UTF-8";
+        headers["Authorization"] = `Bearer ${(await this.account.getToken()).accessToken}`;
+        headers["user-agent"] = Constants.User_Agent;
+        headers["x-user-agent"] = Constants.X_User_Agent[this.account.region];
+        headers["x-identity-provider"] = "gcdm";
+        headers["bmw-session-id"] = correlationId;
+        headers["x-correlation-id"] = correlationId;
+        headers["bmw-correlation-id"] = correlationId;
+
         if (requestBodyContent) {
             headers.Accept = "application/json;charset=utf-8";
         }
