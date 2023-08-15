@@ -80,7 +80,9 @@ export class ConnectedDrive {
         if (waitExecution) {
             const timer = setInterval(async () => {
                 const status = await this.getServiceStatus(response.eventId);
-                if (status === RemoteServiceExecutionState.EXECUTED || status === RemoteServiceExecutionState.CANCELLED_WITH_ERROR) {
+                if (status === RemoteServiceExecutionState.EXECUTED
+                    || status === RemoteServiceExecutionState.CANCELLED_WITH_ERROR
+                    || status === RemoteServiceExecutionState.ERROR) {
                     clearInterval(timer);
                 }
             }, this.serviceExecutionStatusCheckInterval);

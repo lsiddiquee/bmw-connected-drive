@@ -7,5 +7,6 @@ export enum RemoteServiceExecutionState {
     PROV_RUNNING = "PROV_RUNNING",
     EXECUTED = "EXECUTED",
     CANCELLED_WITH_ERROR = "CANCELLED_WITH_ERROR",
+    ERROR = "ERROR",
     UNKNOWN = "UNKNOWN"
 }
