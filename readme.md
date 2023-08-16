@@ -35,4 +35,4 @@ Any utilization, consumption and application of this library is done at the user
 
 ## Acknowledgements
 
-Inspired by <https://github.com/bimmerconnected/bimmer_connecte>
+Inspired by <https://github.com/bimmerconnected/bimmer_connected>
