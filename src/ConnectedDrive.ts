@@ -15,7 +15,7 @@ export class ConnectedDrive {
     logger?: ILogger;
 
     constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger) {
-        this.account = new Account(username, password, region, tokenStore);
+        this.account = new Account(username, password, region, tokenStore, logger);
         this.logger = logger;
     }
 
@@ -71,11 +71,20 @@ export class ConnectedDrive {
         return await this.executeService(vin, RemoteServices.BlowHorn, {}, waitExecution);
     }
 
-    private async executeService(vin: string, serviceType: RemoteServices, requestBody: any, waitExecution: boolean): Promise<RemoteServiceRequestResponse> {
+    private async executeService(vin: string, serviceType: RemoteServices, params: { [key: string]: string }, waitExecution: boolean): Promise<RemoteServiceRequestResponse> {
         let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.executeRemoteServices}`;
         url = url.replace("{vehicleVin}", vin);
         url = url.replace("{serviceType}", serviceType);
-        const response: RemoteServiceRequestResponse = await this.request(url, true, requestBody);
+
+        if (Object.keys(params).length > 0) {
+            const queryString = Object.keys(params)
+                .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+                .join('&');
+            
+                url += `?${queryString}`;
+        }
+
+        const response: RemoteServiceRequestResponse = await this.request(url, true, {});
 
         if (waitExecution) {
             const timer = setInterval(async () => {
