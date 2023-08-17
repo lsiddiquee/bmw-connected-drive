@@ -20,6 +20,7 @@ export class Account {
     token?: Token;
     tokenStore?: ITokenStore;
     logger?: ILogger;
+    session_id: string = uuidv4();
 
     constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger) {
         this.username = username;
@@ -70,11 +71,16 @@ export class Account {
 
     private async retrieveToken(parameters: any): Promise<Token | undefined> {
         const authSettingsUrl: string = `https://${Constants.ServerEndpoints[this.region]}/eadrax-ucs/v1/presentation/oauth/config`;
+        const correlationId = uuidv4();
 
         let serverResponse = await this.executeFetchWithRetry(authSettingsUrl, {
             method: "GET",
             headers: {
-                "ocp-apim-subscription-key": Constants.OAuthAuthorizationKey[this.region]
+                "ocp-apim-subscription-key": Constants.OAuthAuthorizationKey[this.region],
+                "bmw-session-id": this.session_id,
+                "x-identity-provider": "gcdm",
+                "x-correlation-id": correlationId,
+                "bmw-correlation-id": correlationId
             },
             credentials: "same-origin"
         }, response => response.ok);
@@ -86,7 +92,6 @@ export class Account {
         const hash = crypto.createHash('sha256');
         const code_challenge = Account.base64UrlEncode(hash.update(code_verifier).digest());
         const state = Account.base64UrlEncode(crypto.randomBytes(16));
-        const authenticateUrl = `${data.gcdmBaseUrl}/gcdm/oauth/authenticate`;
         const tokenUrl = data.tokenEndpoint;
         const returnUrl = data.returnUrl;
 
@@ -101,9 +106,10 @@ export class Account {
             code_challenge_method: "S256"
         };
 
-        let body = {...parameters, ...baseOAuthParams};
+        let body = {...baseOAuthParams, ...parameters};
         this.logger?.LogTrace(JSON.stringify(body));
 
+        const authenticateUrl = data.tokenEndpoint.replace("/token", "/authenticate");
         serverResponse = await this.executeFetchWithRetry(authenticateUrl, {
             method: "POST",
             body: new URLSearchParams(body),
