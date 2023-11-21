@@ -13,6 +13,7 @@ import { RemoteServiceExecutionStateDetailed } from "./RemoteServiceExecutionSta
 import { FileTokenStore } from "./FileTokenStore"
 import { ConsoleLogger } from "./ConsoleLogger"
 import { Capabilities, ChargingProfile, ChargingSettings, CheckControlMessage, Coordinates, Address, DepartureTime, DriverGuideInfo,  ReductionOfChargeCurrent, RemoteServiceRequestResponse, RequiredService, TireStatus, TireStatusInfo, Vehicle, Attributes, SoftwareVersion, PuStep, MappingInfo, VehicleStatus, Time, ClimateControlState, ClimateTimer, CombustionFuelLevel, DoorsState, DriverPreferences, ElectricChargingState, TireStatuses, WindowsState, DigitalKey, RemoteChargingCommands, LocationInfo } from "./VehicleApiResponse"
+import { Units } from "./Units"
 
 export {
     LogLevel,
@@ -57,5 +58,6 @@ export {
     Capabilities,
     DigitalKey,
     RemoteChargingCommands,
-    RemoteServiceRequestResponse
+    RemoteServiceRequestResponse,
+    Units
 }

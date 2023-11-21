@@ -8,14 +8,15 @@ import { ITokenStore } from "./ITokenStore";
 import { ILogger } from "./ILogger";
 import { Capabilities, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./VehicleApiResponse";
 import { v4 as uuidv4 } from 'uuid';
+import { Units } from "./Units";
 
 export class ConnectedDrive {
     serviceExecutionStatusCheckInterval = 5000;
     account: Account;
     logger?: ILogger;
 
-    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger) {
-        this.account = new Account(username, password, region, tokenStore, logger);
+    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger, unit: Units = Units.KM_L) {
+        this.account = new Account(username, password, region, tokenStore, logger, unit);
         this.logger = logger;
     }
 
@@ -120,10 +121,11 @@ export class ConnectedDrive {
         const httpMethod = isPost ? "POST" : "GET";
         const requestBodyContent = requestBody ? JSON.stringify(requestBody) : null;
 
-        headers["Accept"] = "application/json";
+        headers["accept"] = "application/json";
         headers["accept-language"] = "en";
-        headers["Content-Type"] = "application/json;charset=UTF-8";
-        headers["Authorization"] = `Bearer ${(await this.account.getToken()).accessToken}`;
+        headers["bmw-units-preferences"] = this.account.unit;
+        headers["content-type"] = "application/json;charset=UTF-8";
+        headers["authorization"] = `Bearer ${(await this.account.getToken()).accessToken}`;
         headers["user-agent"] = Constants.User_Agent;
         headers["x-user-agent"] = Constants.X_User_Agent[this.account.region];
         headers["x-identity-provider"] = "gcdm";

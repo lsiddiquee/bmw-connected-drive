@@ -8,6 +8,7 @@ import {v4 as uuidv4} from 'uuid';
 
 import crypto from "crypto";
 import {URLSearchParams} from "url";
+import { Units } from "./Units";
 
 const crossFetch = require('cross-fetch')
 const fetch = require('fetch-cookie')(crossFetch)
@@ -17,15 +18,17 @@ export class Account {
     username: string;
     password: string;
     region: Regions;
+    unit: Units;
     token?: Token;
     tokenStore?: ITokenStore;
     logger?: ILogger;
     session_id: string = uuidv4();
 
-    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger) {
+    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger, unit: Units = Units.KM_L) {
         this.username = username;
         this.password = password;
         this.region = region;
+        this.unit = unit;
         this.tokenStore = tokenStore ?? new LocalTokenStore();
         this.logger = logger;
     }
