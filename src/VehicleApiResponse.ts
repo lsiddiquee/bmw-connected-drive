@@ -250,6 +250,9 @@ export interface DigitalKey {
 }
 
 export interface RemoteChargingCommands {
+    chargingControl?:                       string[];
+    flapControl?:                           string[];
+    plugControl?:                           string[];
 }
 
 export interface RemoteServiceRequestResponse {

@@ -8,15 +8,15 @@ import { ITokenStore } from "./ITokenStore";
 import { ILogger } from "./ILogger";
 import { Capabilities, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./VehicleApiResponse";
 import { v4 as uuidv4 } from 'uuid';
-import { Units } from "./Units";
+import { Utils } from "./Utils";
 
 export class ConnectedDrive {
     serviceExecutionStatusCheckInterval = 5000;
     account: Account;
     logger?: ILogger;
 
-    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger, unit: Units = Units.KM_L) {
-        this.account = new Account(username, password, region, tokenStore, logger, unit);
+    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger) {
+        this.account = new Account(username, password, region, tokenStore, logger);
         this.logger = logger;
     }
 
@@ -72,8 +72,18 @@ export class ConnectedDrive {
         return await this.executeService(vin, RemoteServices.BlowHorn, {}, waitExecution);
     }
 
-    private async executeService(vin: string, serviceType: RemoteServices, params: { [key: string]: string }, waitExecution: boolean): Promise<RemoteServiceRequestResponse> {
-        let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.executeRemoteServices}`;
+    async startCharging(vin: string, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+        this.logger?.LogInformation("Start Charging");
+        return await this.executeService(vin, RemoteServices.ChargeStart, {}, waitExecution, Constants.vehicleChargingStartStopUrl);
+    }
+
+    async stopCharging(vin: string, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+        this.logger?.LogInformation("Stop Charging");
+        return await this.executeService(vin, RemoteServices.ChargeStop, {}, waitExecution, Constants.vehicleChargingStartStopUrl);
+    }
+
+    private async executeService(vin: string, serviceType: RemoteServices, params: { [key: string]: string }, waitExecution: boolean, remoteServiceUrl: string = Constants.executeRemoteServices): Promise<RemoteServiceRequestResponse> {
+        let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${remoteServiceUrl}`;
         url = url.replace("{vehicleVin}", vin);
         url = url.replace("{serviceType}", serviceType);
 
@@ -120,10 +130,10 @@ export class ConnectedDrive {
         const correlationId = uuidv4();
         const httpMethod = isPost ? "POST" : "GET";
         const requestBodyContent = requestBody ? JSON.stringify(requestBody) : null;
+        let retryCount = 0;
 
         headers["accept"] = "application/json";
         headers["accept-language"] = "en";
-        headers["bmw-units-preferences"] = this.account.unit;
         headers["content-type"] = "application/json;charset=UTF-8";
         headers["authorization"] = `Bearer ${(await this.account.getToken()).accessToken}`;
         headers["user-agent"] = Constants.User_Agent;
@@ -137,17 +147,25 @@ export class ConnectedDrive {
             headers.Accept = "application/json;charset=utf-8";
         }
 
-        const response = await fetch(url, {
-            method: httpMethod,
-            body: requestBodyContent,
-            headers: headers,
-            credentials: "same-origin"
-        });
+        let response : Response;
+        let responseString : string;
+        do {
+            if (retryCount !== 0) {
+                await Utils.Delay(2000, this.logger);
+            }
 
-        const responseString = await response.text();
-
-        this.logger?.LogTrace(`Request: ${url}, Method: ${httpMethod}, Headers: ${JSON.stringify(headers)}, Body: ${requestBodyContent}`);
-        this.logger?.LogTrace(`Response: ${response.status}, Headers: ${JSON.stringify(response.headers)}, Body: ${responseString}`);
+            response = await fetch(url, {
+                method: httpMethod,
+                body: requestBodyContent,
+                headers: headers,
+                credentials: "same-origin"
+            });
+    
+            responseString = await response.text();
+    
+            this.logger?.LogTrace(`Request: ${url}, Method: ${httpMethod}, Headers: ${JSON.stringify(headers)}, Body: ${requestBodyContent}`);
+            this.logger?.LogTrace(`Response: ${response.status}, Headers: ${JSON.stringify(response.headers)}, Body: ${responseString}`);
+        } while (retryCount++ < 5 && (response.status === 429 || (response.status === 403 && response.statusText.includes("quota"))));
 
         if (!response.ok) {
             throw new Error(`Error occurred while attempting '${httpMethod}' at url '${url}' with ${response.status} body (${requestBodyContent})\n${responseString}`);

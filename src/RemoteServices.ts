@@ -9,6 +9,8 @@ export enum RemoteServices {
     BlowHorn = "horn-blow",
     /** light */
     FlashLight = "light-flash",
-    /** charge now */
-    ChargeNow = "CHARGE_NOW"
+    /** start charging */
+    ChargeStart = "start-charging",
+    /** stop charging */
+    ChargeStop = "stop-charging"
 }
