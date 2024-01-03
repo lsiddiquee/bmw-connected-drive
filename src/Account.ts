@@ -4,8 +4,9 @@ import { Token } from "./Token"
 import { ITokenStore } from "./ITokenStore";
 import { LocalTokenStore } from "./LocalTokenStore";
 import { ILogger } from "./ILogger";
-import {v4 as uuidv4} from 'uuid';
+import { Utils } from "./Utils";
 
+import { v4 as uuidv4 } from 'uuid';
 import crypto from "crypto";
 import {URLSearchParams} from "url";
 
@@ -189,7 +190,7 @@ export class Account {
         do {
             response = await fetch(url, init);
             retryCount++;
-        } while (retryCount < 10 && !responseValidator(response) && (await this.delay(1000)));
+        } while (retryCount < 10 && !responseValidator(response) && (await Utils.Delay(1000, this.logger)));
 
         if (!responseValidator(response)) {
             this.logger?.LogError(`${response.status}: Error occurred while attempting to retrieve token. Server response: ${(await response.text())}`);
@@ -197,12 +198,6 @@ export class Account {
         }
 
         return response;
-    }
-
-    private async delay(ms: number): Promise<boolean> {
-        this.logger?.LogTrace("Sleeping for retry.")
-        await new Promise(resolve => setTimeout(resolve, ms));
-        return true;
     }
 
     private static getQueryStringValue(url: string, queryParamName: string): string {

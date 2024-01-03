@@ -1,5 +1,4 @@
-﻿import {ILogger} from "./ILogger";
-import {LogLevel} from "./LogLevel";
+﻿import {LogLevel} from "./LogLevel";
 import {LoggerBase} from "./LoggerBase";
 
 export class ConsoleLogger extends  LoggerBase {

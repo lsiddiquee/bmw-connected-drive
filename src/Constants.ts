@@ -15,11 +15,11 @@ export class Constants {
         China: "blF2NkNxdHhKdVhXUDc0eGYzQ0p3VUVQOjF6REh4NnVuNGNEanliTEVOTjNreWZ1bVgya0VZaWdXUGNRcGR2RFJwSUJrN3JPSg=="
     }
 
-    static readonly User_Agent: string = "Dart/2.14 (dart:io)";
+    static readonly User_Agent: string = "Dart/2.19 (dart:io)";
     static readonly X_User_Agent: EndpointMap = {
-        NorthAmerica: "android(SP1A.210812.016.C1);bmw;2.5.2(14945);na",
-        RestOfWorld: "android(SP1A.210812.016.C1);bmw;2.5.2(14945);row",
-        China: "android(SP1A.210812.016.C1);bmw;2.3.0(13603);cn"
+        NorthAmerica: "android(TQ2A.230405.003.B2);bmw;3.9.0(27760);na",
+        RestOfWorld: "android(TQ2A.230405.003.B2);bmw;3.9.0(27760);row",
+        China: "android(TQ2A.230405.003.B2);bmw;3.6.1(23634);cn"
     }
 
     static readonly getVehicles: string = "/eadrax-vcs/v4/vehicles";
@@ -27,4 +27,10 @@ export class Constants {
     static readonly executeRemoteServices: string =  Constants.remoteServicesBaseUrl + "/{vehicleVin}/{serviceType}";
     static readonly statusRemoteServices: string = Constants.remoteServicesBaseUrl + "/eventStatus?eventId={eventId}";
     static readonly statusRemoteServicePostion: string = Constants.remoteServicesBaseUrl + "/eventPosition?eventId={eventId}";
+
+    static readonly vehicleChargingDetailsUrl = "/eadrax-crccs/v2/vehicles";
+    static readonly vehicleChargingBaseUrl = "/eadrax-crccs/v1/vehicles/{vehicleVin}";
+    static readonly vehicleChargingSettingsSetUrl = Constants.vehicleChargingBaseUrl + "/charging-settings";
+    static readonly vehicleChargingProfileSetUrl = Constants.vehicleChargingBaseUrl + "/charging-profile";
+    static readonly vehicleChargingStartStopUrl = Constants.vehicleChargingBaseUrl + "/{serviceType}";
 }
