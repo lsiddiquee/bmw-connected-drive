@@ -31,7 +31,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lsiddiquee/bmw-connected-drive"
+    "url": "git+https://github.com/lsiddiquee/bmw-connected-drive.git"
   },
   "bugs": {
     "url": "https://github.com/lsiddiquee/bmw-connected-drive/issues"
