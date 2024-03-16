@@ -1,27 +1,30 @@
+import { CarBrands } from "./CarBrands";
 import { Regions } from "./Regions"
 
 type EndpointMap = { [P in Regions]: string }
 
 export class Constants {
     static readonly ServerEndpoints: EndpointMap = {
-        NorthAmerica: "cocoapi.bmwgroup.us",
-        RestOfWorld: "cocoapi.bmwgroup.com",
-        China: "myprofile.bmw.com.cn"
+        na: "cocoapi.bmwgroup.us",
+        row: "cocoapi.bmwgroup.com",
+        cn: "myprofile.bmw.com.cn"
     }
 
-    static readonly OAuthAuthorizationKey: EndpointMap = {
-        NorthAmerica: "31e102f5-6f7e-7ef3-9044-ddce63891362",
-        RestOfWorld: "4f1c85a3-758f-a37d-bbb6-f8704494acfa",
-        China: "blF2NkNxdHhKdVhXUDc0eGYzQ0p3VUVQOjF6REh4NnVuNGNEanliTEVOTjNreWZ1bVgya0VZaWdXUGNRcGR2RFJwSUJrN3JPSg=="
+    static readonly ApimSubscriptionKey: EndpointMap = {
+        na: "31e102f5-6f7e-7ef3-9044-ddce63891362",
+        row: "4f1c85a3-758f-a37d-bbb6-f8704494acfa",
+        cn: "blF2NkNxdHhKdVhXUDc0eGYzQ0p3VUVQOjF6REh4NnVuNGNEanliTEVOTjNreWZ1bVgya0VZaWdXUGNRcGR2RFJwSUJrN3JPSg=="
+    }
+
+    static readonly AppVersions: EndpointMap = {
+        na: "3.11.1(29513)",
+        row: "3.11.1(29513)",
+        cn: "3.11.1(29513)",
     }
 
     static readonly User_Agent: string = "Dart/2.19 (dart:io)";
-    static readonly X_User_Agent: EndpointMap = {
-        NorthAmerica: "android(TQ2A.230405.003.B2);bmw;3.9.0(27760);na",
-        RestOfWorld: "android(TQ2A.230405.003.B2);bmw;3.9.0(27760);row",
-        China: "android(TQ2A.230405.003.B2);bmw;3.6.1(23634);cn"
-    }
-
+    static X_User_Agent = (region: Regions, brand?: CarBrands) => `android(TQ2A.230405.003.B2);${(brand ?? CarBrands.Bmw).toLowerCase()};${this.AppVersions[region]};${region}`
+    
     static readonly getVehicles: string = "/eadrax-vcs/v4/vehicles";
     static readonly remoteServicesBaseUrl: string = "/eadrax-vrccs/v2/presentation/remote-commands";
     static readonly executeRemoteServices: string =  Constants.remoteServicesBaseUrl + "/{vehicleVin}/{serviceType}";

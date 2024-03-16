@@ -1,5 +1,5 @@
 export enum Regions {
-    NorthAmerica = "NorthAmerica",
-    RestOfWorld = "RestOfWorld",
-    China = "China"
+    NorthAmerica = "na",
+    RestOfWorld = "row",
+    China = "cn"
 }

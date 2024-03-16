@@ -5,6 +5,7 @@ import { ITokenStore } from "./ITokenStore"
 import { Token } from "./Token"
 import { Regions } from "./Regions"
 import { Account } from "./Account"
+import { CarBrands } from "./CarBrands"
 import { ConnectedDrive } from "./ConnectedDrive"
 import { RemoteServices } from "./RemoteServices"
 import { DetailedServiceStatus } from "./DetailedServiceStatus"
@@ -23,6 +24,7 @@ export {
     Token,
     Regions,
     Account,
+    CarBrands,
     ConnectedDrive,
     RemoteServices,
     DetailedServiceStatus,
