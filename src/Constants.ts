@@ -1,4 +1,4 @@
-import { CarBrands } from "./CarBrands";
+import { CarBrand } from "./CarBrand";
 import { Regions } from "./Regions"
 
 type EndpointMap = { [P in Regions]: string }
@@ -29,7 +29,7 @@ export class Constants {
     }
 
     static readonly User_Agent: string = "Dart/2.19 (dart:io)";
-    static X_User_Agent = (region: Regions, brand: CarBrands = CarBrands.Bmw) => `android(TQ2A.230405.003.B2);${brand.toLowerCase()};${this.AppVersions[region]};${this.RegionCodes[region]}`;        
+    static X_User_Agent = (region: Regions, brand: CarBrand = CarBrand.Bmw) => `android(TQ2A.230405.003.B2);${brand.toLowerCase()};${this.AppVersions[region]};${this.RegionCodes[region]}`;        
     
     static readonly getVehicles: string = "/eadrax-vcs/v4/vehicles";
     static readonly remoteServicesBaseUrl: string = "/eadrax-vrccs/v2/presentation/remote-commands";

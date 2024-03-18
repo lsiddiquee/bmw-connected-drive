@@ -1,4 +1,4 @@
-import { CarBrands } from "./CarBrands";
+import { CarBrand } from "./CarBrand";
 
 export interface Vehicle {
     vin:            string;
@@ -12,7 +12,7 @@ export interface Attributes {
     model:                    string;
     year:                     number;
     color:                    number;
-    brand:                    CarBrands;
+    brand:                    CarBrand;
     driveTrain:               string;
     headUnitType:             string;
     headUnitRaw:              string;

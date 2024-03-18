@@ -1,4 +1,4 @@
-export enum CarBrands {
+export enum CarBrand {
     Bmw = "BMW",
     Mini = "MINI"
 }
