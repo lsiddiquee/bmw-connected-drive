@@ -37,7 +37,7 @@ export class ConnectedDrive {
         return (result);
     }
 
-    async getVehicleStatus(vin: string, brand: CarBrands): Promise<VehicleStatus> {
+    async getVehicleStatus(vin: string, brand: CarBrands = CarBrands.Bmw): Promise<VehicleStatus> {
         this.logger?.LogInformation("Getting vehicle status.");
 
         const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
@@ -45,7 +45,7 @@ export class ConnectedDrive {
         return (await this.request(url, brand, false, null, { "bmw-vin": vin })).state;
     }
 
-    async getVehicleCapabilities(vin: string, brand: CarBrands): Promise<Capabilities> {
+    async getVehicleCapabilities(vin: string, brand: CarBrands = CarBrands.Bmw): Promise<Capabilities> {
         this.logger?.LogInformation("Getting vehicle capabilities.");
 
         const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
@@ -53,41 +53,41 @@ export class ConnectedDrive {
         return (await this.request(url, brand, false, null, { "bmw-vin": vin })).capabilities;
     }
 
-    async lockDoors(vin: string, brand: CarBrands, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+    async lockDoors(vin: string, brand: CarBrands = CarBrands.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Locking doors");
         return await this.executeService(vin, brand, RemoteServices.LockDoors, {}, waitExecution);
     }
 
-    async unlockDoors(vin: string, brand: CarBrands, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+    async unlockDoors(vin: string, brand: CarBrands = CarBrands.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Unlocking doors");
         return await this.executeService(vin, brand, RemoteServices.UnlockDoors, {}, waitExecution);
     }
 
-    async startClimateControl(vin: string, brand: CarBrands, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+    async startClimateControl(vin: string, brand: CarBrands = CarBrands.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Start Climate Control");
         return await this.executeService(vin, brand, RemoteServices.ClimateNow, { "action": "START" }, waitExecution);
     }
 
-    async stopClimateControl(vin: string, brand: CarBrands, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+    async stopClimateControl(vin: string, brand: CarBrands = CarBrands.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Stop Climate Control");
         return await this.executeService(vin, brand, RemoteServices.ClimateNow, { "action": "STOP" }, waitExecution);
     }
 
-    async flashLights(vin: string, brand: CarBrands, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+    async flashLights(vin: string, brand: CarBrands = CarBrands.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         return await this.executeService(vin, brand, RemoteServices.FlashLight, {}, waitExecution);
     }
 
-    async blowHorn(vin: string, brand: CarBrands, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+    async blowHorn(vin: string, brand: CarBrands = CarBrands.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Blow Horn");
         return await this.executeService(vin, brand, RemoteServices.BlowHorn, {}, waitExecution);
     }
 
-    async startCharging(vin: string, brand: CarBrands, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+    async startCharging(vin: string, brand: CarBrands = CarBrands.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Start Charging");
         return await this.executeService(vin, brand, RemoteServices.ChargeStart, {}, waitExecution, Constants.vehicleChargingStartStopUrl);
     }
 
-    async stopCharging(vin: string, brand: CarBrands, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+    async stopCharging(vin: string, brand: CarBrands = CarBrands.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Stop Charging");
         return await this.executeService(vin, brand, RemoteServices.ChargeStop, {}, waitExecution, Constants.vehicleChargingStartStopUrl);
     }
@@ -121,14 +121,14 @@ export class ConnectedDrive {
         return response;
     }
 
-    async getServiceStatus(eventId: string, brand: CarBrands): Promise<RemoteServiceExecutionState> {
+    async getServiceStatus(eventId: string, brand: CarBrands = CarBrands.Bmw): Promise<RemoteServiceExecutionState> {
         let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.statusRemoteServices}`;
         url = url.replace("{eventId}", eventId);
 
         return (await this.request(url, brand, true, {})).eventStatus;
     }
 
-    async sendMessage(vin: string, brand: CarBrands, subject: string, message: string): Promise<boolean> {
+    async sendMessage(vin: string, brand: CarBrands = CarBrands.Bmw, subject: string, message: string): Promise<boolean> {
         // TODO: Cleanup
         let url: string = `https://${Constants.ServerEndpoints[this.account.region]}`;
         const requestBody = { "vins": [vin], "message": message, "subject": subject };
@@ -136,7 +136,7 @@ export class ConnectedDrive {
         return (await this.request(url, brand, true, requestBody))?.status === "OK";
     }
 
-    async request(url: string, brand?: CarBrands, isPost: boolean = false, requestBody?: any, headers: any = {}): Promise<any> {
+    async request(url: string, brand: CarBrands = CarBrands.Bmw, isPost: boolean = false, requestBody?: any, headers: any = {}): Promise<any> {
         const correlationId = uuidv4();
         const httpMethod = isPost ? "POST" : "GET";
         const requestBodyContent = requestBody ? JSON.stringify(requestBody) : null;

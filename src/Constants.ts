@@ -23,7 +23,7 @@ export class Constants {
     }
 
     static readonly User_Agent: string = "Dart/2.19 (dart:io)";
-    static X_User_Agent = (region: Regions, brand?: CarBrands) => `android(TQ2A.230405.003.B2);${(brand ?? CarBrands.Bmw).toLowerCase()};${this.AppVersions[region]};${region}`
+    static X_User_Agent = (region: Regions, brand: CarBrands = CarBrands.Bmw) => `android(TQ2A.230405.003.B2);${brand.toLowerCase()};${this.AppVersions[region]};${region}`
     
     static readonly getVehicles: string = "/eadrax-vcs/v4/vehicles";
     static readonly remoteServicesBaseUrl: string = "/eadrax-vrccs/v2/presentation/remote-commands";
