@@ -77,7 +77,7 @@ export class Account {
         let serverResponse = await this.executeFetchWithRetry(authSettingsUrl, {
             method: "GET",
             headers: {
-                "ocp-apim-subscription-key": Constants.OAuthAuthorizationKey[this.region],
+                "ocp-apim-subscription-key": Constants.ApimSubscriptionKey[this.region],
                 "bmw-session-id": this.session_id,
                 "x-identity-provider": "gcdm",
                 "x-correlation-id": correlationId,
@@ -181,7 +181,7 @@ export class Account {
         let response: Response;
         let retryCount = 0;
         init.headers["user-agent"] = Constants.User_Agent;
-        init.headers["x-user-agent"] = Constants.X_User_Agent[this.region];
+        init.headers["x-user-agent"] = Constants.X_User_Agent(this.region);
         init.headers["x-identity-provider"] = "gcdm";
         init.headers["bmw-session-id"] = correlationId;
         init.headers["x-correlation-id"] = correlationId;
