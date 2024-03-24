@@ -106,17 +106,17 @@ export class ConnectedDrive {
             url += `?${queryString}`;
         }
 
-        const response: RemoteServiceRequestResponse = await this.request(url, brand, true, {});
+        const response: RemoteServiceRequestResponse = await this.postAsJson(url, brand);
 
         if (waitExecution) {
-            const timer = setInterval(async () => {
-                const status = await this.getServiceStatus(response.eventId, brand);
-                if (status === RemoteServiceExecutionState.EXECUTED
-                    || status === RemoteServiceExecutionState.CANCELLED_WITH_ERROR
-                    || status === RemoteServiceExecutionState.ERROR) {
-                    clearInterval(timer);
-                }
-            }, this.serviceExecutionStatusCheckInterval);
+            let status: RemoteServiceExecutionState = RemoteServiceExecutionState.UNKNOWN;
+
+            while (status !== RemoteServiceExecutionState.EXECUTED
+                && status !== RemoteServiceExecutionState.CANCELLED_WITH_ERROR
+                && status !== RemoteServiceExecutionState.ERROR) {
+                status = await this.getServiceStatus(response.eventId, brand);
+                await Utils.Delay(this.serviceExecutionStatusCheckInterval, this.logger);
+            }
         }
 
         return response;
