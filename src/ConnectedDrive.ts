@@ -10,6 +10,7 @@ import { ILogger } from "./ILogger";
 import { Capabilities, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./VehicleApiResponse";
 import { v4 as uuidv4 } from 'uuid';
 import { Utils } from "./Utils";
+import { CarView } from "./CarView";
 
 export class ConnectedDrive {
     serviceExecutionStatusCheckInterval = 5000;
@@ -31,7 +32,7 @@ export class ConnectedDrive {
             this.logger?.LogInformation(`Getting ${brand} vehicles`);
 
             const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}?${params}`;
-            let vehicles = await this.request(url, brand);
+            let vehicles = await this.getFromJson(url, brand);
             result.push(...vehicles);
         }
         return (result);
@@ -42,7 +43,7 @@ export class ConnectedDrive {
 
         const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
         const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}/state?${params}`;
-        return (await this.request(url, brand, false, null, { "bmw-vin": vin })).state;
+        return (await this.getFromJson(url, brand, { "bmw-vin": vin })).state;
     }
 
     async getVehicleCapabilities(vin: string, brand: CarBrand = CarBrand.Bmw): Promise<Capabilities> {
@@ -50,7 +51,7 @@ export class ConnectedDrive {
 
         const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
         const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}/state?${params}`;
-        return (await this.request(url, brand, false, null, { "bmw-vin": vin })).capabilities;
+        return (await this.getFromJson(url, brand, { "bmw-vin": vin })).capabilities;
     }
 
     async lockDoors(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
@@ -125,7 +126,21 @@ export class ConnectedDrive {
         let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.statusRemoteServices}`;
         url = url.replace("{eventId}", eventId);
 
-        return (await this.request(url, brand, true, {})).eventStatus;
+        return (await this.postAsJson(url, brand)).eventStatus;
+    }
+
+    async getImage(vin: string, brand: CarBrand = CarBrand.Bmw, view: CarView): Promise<ArrayBuffer> {
+        let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getImages}`;
+        url = url.replace("{carView}", view);
+
+        const headers = {
+            "accept": "image/png",
+            "bmw-app-vehicle-type": "connected",
+            "bmw-vin": vin
+        };
+
+        const response = await this.get(url, brand, headers);
+        return await response.arrayBuffer();
     }
 
     async sendMessage(vin: string, brand: CarBrand = CarBrand.Bmw, subject: string, message: string): Promise<boolean> {
@@ -133,10 +148,22 @@ export class ConnectedDrive {
         let url: string = `https://${Constants.ServerEndpoints[this.account.region]}`;
         const requestBody = { "vins": [vin], "message": message, "subject": subject };
 
-        return (await this.request(url, brand, true, requestBody))?.status === "OK";
+        return (await this.postAsJson(url, brand, requestBody))?.status === "OK";
     }
 
-    async request(url: string, brand: CarBrand = CarBrand.Bmw, isPost: boolean = false, requestBody?: any, headers: any = {}): Promise<any> {
+    async get(url: string, brand: CarBrand = CarBrand.Bmw, headers: any = {}): Promise<Response> {
+        return await this.request(url, brand, false, null, headers);
+    }
+
+    async getFromJson(url: string, brand: CarBrand = CarBrand.Bmw, headers: any = {}): Promise<any> {
+        return (await this.get(url, brand, headers)).json();
+    }
+
+    async postAsJson(url: string, brand: CarBrand = CarBrand.Bmw, requestBody: any = {}, headers: any = {}): Promise<any> {
+        return (await this.request(url, brand, true, requestBody, headers)).json();
+    }
+
+    async request(url: string, brand: CarBrand = CarBrand.Bmw, isPost: boolean = false, requestBody?: any, headers: any = {}): Promise<Response> {
         const correlationId = uuidv4();
         const httpMethod = isPost ? "POST" : "GET";
         const requestBodyContent = requestBody ? JSON.stringify(requestBody) : null;
@@ -156,7 +183,6 @@ export class ConnectedDrive {
         };
 
         let response: Response;
-        let responseString: string;
         do {
             if (retryCount !== 0) {
                 await Utils.Delay(2000, this.logger);
@@ -169,16 +195,14 @@ export class ConnectedDrive {
                 credentials: "same-origin"
             });
 
-            responseString = await response.text();
-
             this.logger?.LogTrace(`Request: ${url}, Method: ${httpMethod}, Headers: ${JSON.stringify(headers)}, Body: ${requestBodyContent}`);
-            this.logger?.LogTrace(`Response: ${response.status}, Headers: ${JSON.stringify(response.headers)}, Body: ${responseString}`);
+            this.logger?.LogTrace(`Response: ${response.status}, Headers: ${JSON.stringify(response.headers)}`);
         } while (retryCount++ < 5 && (response.status === 429 || (response.status === 403 && response.statusText.includes("quota"))));
 
         if (!response.ok) {
-            throw new Error(`Error occurred while attempting '${httpMethod}' at url '${url}' with ${response.status} body (${requestBodyContent})\n${responseString}`);
+            throw new Error(`Error occurred while attempting '${httpMethod}' at url '${url}' with ${response.status} body (${requestBodyContent})\n${await response.text()}`);
         }
 
-        return JSON.parse(responseString);
+        return response;
     }
 }
