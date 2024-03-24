@@ -11,7 +11,7 @@ npm i -S bmw-connected-drive
 ## Usage
 
 ```javascript
-import { ConnectedDrive, Regions } from 'bmw-connected-drive';
+import { ConnectedDrive, CarBrand, Regions } from 'bmw-connected-drive';
 
 // Setup the API client
 const api = new ConnectedDrive(username, password, Regions.RestOfWorld);
@@ -20,10 +20,10 @@ const api = new ConnectedDrive(username, password, Regions.RestOfWorld);
 const vehicles = await api.getVehicles();
 
 // Trigger the Remote Service for remotely heating/cooling the car.
-await api.startClimateControl(vehicleIdentificationNumber);
+await api.startClimateControl(vehicleIdentificationNumber, CarBrand.Bmw);
 
 // Trigger the stopping Remote Service for remotely heating/cooling the car.
-await api.stopClimateControl(vehicleIdentificationNumber);
+await api.stopClimateControl(vehicleIdentificationNumber, CarBrand.Bmw);
 
 ```
 
