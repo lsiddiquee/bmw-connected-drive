@@ -6,13 +6,12 @@ import { Token } from "./Token"
 import { Regions } from "./Regions"
 import { Account } from "./Account"
 import { CarBrand } from "./CarBrand"
+import { CarView } from "./CarView"
 import { ConnectedDrive } from "./ConnectedDrive"
 import { RemoteServices } from "./RemoteServices"
 import { DetailedServiceStatus } from "./DetailedServiceStatus"
 import { RemoteServiceExecutionState } from "./RemoteServiceExecutionState"
 import { RemoteServiceExecutionStateDetailed } from "./RemoteServiceExecutionStateDetailed"
-import { FileTokenStore } from "./FileTokenStore"
-import { ConsoleLogger } from "./ConsoleLogger"
 import { Capabilities, ChargingProfile, ChargingSettings, CheckControlMessage, Coordinates, Address, DepartureTime, DriverGuideInfo,  ReductionOfChargeCurrent, RemoteServiceRequestResponse, RequiredService, TireStatus, TireStatusInfo, Vehicle, Attributes, SoftwareVersion, PuStep, MappingInfo, VehicleStatus, Time, ClimateControlState, ClimateTimer, CombustionFuelLevel, DoorsState, DriverPreferences, ElectricChargingState, TireStatuses, WindowsState, DigitalKey, RemoteChargingCommands, LocationInfo } from "./VehicleApiResponse"
 import { Utils } from "./Utils";
 
@@ -25,6 +24,7 @@ export {
     Regions,
     Account,
     CarBrand,
+    CarView,
     ConnectedDrive,
     RemoteServices,
     DetailedServiceStatus,
