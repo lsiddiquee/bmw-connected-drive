@@ -36,6 +36,7 @@ export class Constants {
     static readonly executeRemoteServices: string =  Constants.remoteServicesBaseUrl + "/{vehicleVin}/{serviceType}";
     static readonly statusRemoteServices: string = Constants.remoteServicesBaseUrl + "/eventStatus?eventId={eventId}";
     static readonly statusRemoteServicePostion: string = Constants.remoteServicesBaseUrl + "/eventPosition?eventId={eventId}";
+    static readonly getImages: string = "/eadrax-ics/v5/presentation/vehicles/images?carView={carView}&toCrop=true";
 
     static readonly vehicleChargingDetailsUrl = "/eadrax-crccs/v2/vehicles";
     static readonly vehicleChargingBaseUrl = "/eadrax-crccs/v1/vehicles/{vehicleVin}";
