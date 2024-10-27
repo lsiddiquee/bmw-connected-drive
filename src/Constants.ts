@@ -32,7 +32,7 @@ export class Constants {
     static X_User_Agent = (region: Regions, brand: CarBrand = CarBrand.Bmw) => `android(TQ2A.230405.003.B2);${brand.toLowerCase()};${this.AppVersions[region]};${this.RegionCodes[region]}`;        
     
     static readonly getVehicles: string = "/eadrax-vcs/v4/vehicles";
-    static readonly remoteServicesBaseUrl: string = "/eadrax-vrccs/v2/presentation/remote-commands";
+    static readonly remoteServicesBaseUrl: string = "/eadrax-vrccs/v3/presentation/remote-commands";
     static readonly executeRemoteServices: string =  Constants.remoteServicesBaseUrl + "/{vehicleVin}/{serviceType}";
     static readonly statusRemoteServices: string = Constants.remoteServicesBaseUrl + "/eventStatus?eventId={eventId}";
     static readonly statusRemoteServicePostion: string = Constants.remoteServicesBaseUrl + "/eventPosition?eventId={eventId}";
