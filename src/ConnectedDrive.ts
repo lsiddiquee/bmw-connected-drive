@@ -98,6 +98,10 @@ export class ConnectedDrive {
         url = url.replace("{vehicleVin}", vin);
         url = url.replace("{serviceType}", serviceType);
 
+        const headers = {
+            "bmw-vin": vin
+        };
+
         if (Object.keys(params).length > 0) {
             const queryString = Object.keys(params)
                 .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
@@ -106,7 +110,7 @@ export class ConnectedDrive {
             url += `?${queryString}`;
         }
 
-        const response: RemoteServiceRequestResponse = await this.postAsJson(url, brand);
+        const response: RemoteServiceRequestResponse = await this.postAsJson(url, brand, {}, headers);
 
         if (waitExecution) {
             let status: RemoteServiceExecutionState = RemoteServiceExecutionState.UNKNOWN;
