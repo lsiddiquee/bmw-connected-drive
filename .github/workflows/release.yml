@@ -1,0 +1,10 @@
+on: push
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        env
+      shell: bash
+      env: ${{ secrets }}
