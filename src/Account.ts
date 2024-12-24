@@ -21,14 +21,16 @@ export class Account {
     token?: Token;
     tokenStore?: ITokenStore;
     logger?: ILogger;
+    captchaToken?: string;
     session_id: string = uuidv4();
 
-    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger) {
+    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger, captchaToken?: string) {
         this.username = username;
         this.password = password;
         this.region = region;
         this.tokenStore = tokenStore ?? new LocalTokenStore();
         this.logger = logger;
+        this.captchaToken = captchaToken;
     }
 
     async getToken(): Promise<Token> {
@@ -55,12 +57,17 @@ export class Account {
             }
         }
         if (!this.token || !this.token?.accessToken) {
-            this.logger?.LogDebug("Getting token from token endpoint.");
-            this.token = await this.retrieveToken({
-                "grant_type": "authorization_code",
-                "username": this.username,
-                "password": this.password
-            })
+            if(this.captchaToken){
+                this.logger?.LogDebug("Getting token from token endpoint.");
+                this.token = await this.retrieveToken({
+                    "grant_type": "authorization_code",
+                    "username": this.username,
+                    "password": this.password
+                }, this.captchaToken);
+                this.captchaToken = undefined; // Delete becuse the captcha token is only valid for a short time and can only be used once
+            }else{
+                this.logger?.LogDebug("Missing captcha token for first authentication.");
+            }
         }
 
         if (!this.token) {
@@ -70,7 +77,7 @@ export class Account {
         return this.token;
     }
 
-    private async retrieveToken(parameters: any): Promise<Token | undefined> {
+    private async retrieveToken(parameters: any, captchaToken?: string): Promise<Token | undefined> {
         const authSettingsUrl: string = `https://${Constants.ServerEndpoints[this.region]}/eadrax-ucs/v1/presentation/oauth/config`;
         const correlationId = uuidv4();
 
@@ -111,12 +118,15 @@ export class Account {
         this.logger?.LogTrace(JSON.stringify(body));
 
         const authenticateUrl = data.tokenEndpoint.replace("/token", "/authenticate");
+        const headers = {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        } as any;
+        if(captchaToken) headers["hcaptchatoken"] = captchaToken;
+
         serverResponse = await this.executeFetchWithRetry(authenticateUrl, {
             method: "POST",
             body: new URLSearchParams(body),
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-            },
+            headers: headers,
             credentials: "same-origin"
         }, response => response.ok);
 

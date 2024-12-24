@@ -14,7 +14,8 @@ npm i -S bmw-connected-drive
 import { ConnectedDrive, CarBrand, Regions } from 'bmw-connected-drive';
 
 // Setup the API client
-const api = new ConnectedDrive(username, password, Regions.RestOfWorld);
+// captchaToken is required for first authentication you can get token from here: https://bimmer-connected.readthedocs.io/en/stable/captcha.html
+const api = new ConnectedDrive(username, password, Regions.RestOfWorld, captchaToken);
 
 // Fetch a list of vehicles associated with the credentials
 const vehicles = await api.getVehicles();
