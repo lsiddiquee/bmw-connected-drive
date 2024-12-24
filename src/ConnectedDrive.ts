@@ -17,8 +17,8 @@ export class ConnectedDrive {
     account: Account;
     logger?: ILogger;
 
-    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger) {
-        this.account = new Account(username, password, region, tokenStore, logger);
+    constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger, captchaToken?: string) {
+        this.account = new Account(username, password, region, tokenStore, logger, captchaToken);
         this.logger = logger;
     }
 
