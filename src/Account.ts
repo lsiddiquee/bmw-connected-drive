@@ -6,7 +6,7 @@ import { LocalTokenStore } from "./LocalTokenStore";
 import { ILogger } from "./ILogger";
 import { Utils } from "./Utils";
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import crypto from "crypto";
 import {URLSearchParams} from "url";
 
@@ -22,7 +22,6 @@ export class Account {
     tokenStore?: ITokenStore;
     logger?: ILogger;
     captchaToken?: string;
-    session_id: string = uuidv4();
 
     constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger, captchaToken?: string) {
         this.username = username;
@@ -43,13 +42,13 @@ export class Account {
             if (this.token.refreshToken) {
                 this.logger?.LogDebug("Attempting refreshing.");
                 try {
-                    const refreshToken = this.token.refreshToken;
-                    this.token = undefined;
-                    this.token = await this.retrieveToken({
-                        "grant_type": "refresh_token",
-                        "refresh_token": refreshToken
-                    })
-                } catch {
+                    this.token = await this.refresh_token(this.token)
+                } catch (_e) {
+                    this.logger?.LogError("Error occurred while refreshing token. Attempting normal token retrieval.");
+                    let e = _e as Error;
+                    if (e) {
+                        this.logger?.LogError(e.message);
+                    }
                     // Intentional empty catch, as if the refresh failed, we can attempt a normal token retrieval.
                 }
             } else {
@@ -57,15 +56,18 @@ export class Account {
             }
         }
         if (!this.token || !this.token?.accessToken) {
-            if(this.captchaToken){
+            if (this.captchaToken) {
                 this.logger?.LogDebug("Getting token from token endpoint.");
-                this.token = await this.retrieveToken({
+                this.token = await this.login({
                     "grant_type": "authorization_code",
                     "username": this.username,
                     "password": this.password
-                }, this.captchaToken);
-                this.captchaToken = undefined; // Delete becuse the captcha token is only valid for a short time and can only be used once
-            }else{
+                },
+                undefined,
+                undefined,
+                this.captchaToken);
+                this.captchaToken = undefined; // Delete because the captcha token is only valid for a short time and can only be used once
+            } else {
                 this.logger?.LogDebug("Missing captcha token for first authentication.");
             }
         }
@@ -77,15 +79,22 @@ export class Account {
         return this.token;
     }
 
-    private async retrieveToken(parameters: any, captchaToken?: string): Promise<Token | undefined> {
+    private async login(parameters: any, sessionId?: string, sessionCreated?: Date, captchaToken?: string): Promise<Token | undefined> {
         const authSettingsUrl: string = `https://${Constants.ServerEndpoints[this.region]}/eadrax-ucs/v1/presentation/oauth/config`;
-        const correlationId = uuidv4();
+        const correlationId = uuid();
+
+        // If either sessionId is not provided or sessionCreated is not provided or sessionCreated is older than 14 days, create a new session.
+        if (!sessionId || !sessionCreated || (sessionCreated && new Date(sessionCreated).getTime() < new Date().getTime() - (14 * 24 * 60 * 60 * 1000)))
+        {
+            sessionId = uuid();
+            sessionCreated = new Date();
+        }
 
         let serverResponse = await this.executeFetchWithRetry(authSettingsUrl, {
             method: "GET",
             headers: {
                 "ocp-apim-subscription-key": Constants.ApimSubscriptionKey[this.region],
-                "bmw-session-id": this.session_id,
+                "bmw-session-id": sessionId,
                 "x-identity-provider": "gcdm",
                 "x-correlation-id": correlationId,
                 "bmw-correlation-id": correlationId
@@ -121,7 +130,7 @@ export class Account {
         const headers = {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
         } as any;
-        if(captchaToken) headers["hcaptchatoken"] = captchaToken;
+        if (captchaToken) headers["hcaptchatoken"] = captchaToken;
 
         serverResponse = await this.executeFetchWithRetry(authenticateUrl, {
             method: "POST",
@@ -171,23 +180,63 @@ export class Account {
 
         data = await serverResponse.json();
 
-        this.token = {
-            response: JSON.stringify(data),
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token,
-            validUntil: new Date(new Date().getTime() + ((data.expires_in - 5) * 1000))
-        };
+        return this.buildTokenAndStore(data, sessionId, sessionCreated);
+    }
 
-        if (this.tokenStore) {
-            this.logger?.LogDebug("Storing token in token store.");
-            this.tokenStore.storeToken(this.token);
+    private async refresh_token(token: Token): Promise<Token | undefined> {
+        const correlationId = uuid();
+
+        // If either sessionId is not provided or sessionCreated is not provided or sessionCreated is older than 14 days, create a new session.
+        if (!token.sessionId || !token.sessionCreated || (token.sessionCreated && new Date(token.sessionCreated).getTime() < new Date().getTime() - (14 * 24 * 60 * 60 * 1000)))
+        {
+            token.sessionId = uuid();
+            token.sessionCreated = new Date();
         }
 
-        return this.token;
+        const authSettingsUrl: string = `https://${Constants.ServerEndpoints[this.region]}/eadrax-ucs/v1/presentation/oauth/config`;
+        let serverResponse = await this.executeFetchWithRetry(authSettingsUrl, {
+            method: "GET",
+            headers: {
+                "ocp-apim-subscription-key": Constants.ApimSubscriptionKey[this.region],
+                "bmw-session-id": token.sessionId,
+                "x-identity-provider": "gcdm",
+                "x-correlation-id": correlationId,
+                "bmw-correlation-id": correlationId
+            },
+            credentials: "same-origin"
+        }, response => response.ok);
+
+        let data = await serverResponse.json();
+        
+        const body = {
+            grant_type: "refresh_token",
+            refresh_token: token.refreshToken,
+            scope: data.scopes.join(" "),
+            redirect_uri: data.returnUrl,
+        };
+
+        this.logger?.LogTrace(JSON.stringify(body));
+
+        let basicAuth: string = Buffer.from(`${data.clientId}:${data.clientSecret}`).toString('base64');
+        const headers = {
+            "Authorization": `Basic ${basicAuth}`,
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        } as any;
+
+        serverResponse = await this.executeFetchWithRetry(data.tokenEndpoint, {
+            method: "POST",
+            body: new URLSearchParams(body),
+            headers: headers,
+            credentials: "same-origin"
+        }, response => response.ok);
+
+        data = await serverResponse.json();
+
+        return this.buildTokenAndStore(data, token.sessionId, token.sessionCreated);
     }
 
     private async executeFetchWithRetry(url: string, init: any, responseValidator: (response: Response) => boolean): Promise<Response> {
-        const correlationId = uuidv4();
+        const correlationId = uuid();
         let response: Response;
         let retryCount = 0;
         init.headers["user-agent"] = Constants.User_Agent;
@@ -229,5 +278,23 @@ export class Account {
     
     private static base64UrlEncode(buffer: Buffer):string{
         return buffer.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+    
+    private buildTokenAndStore(data: any, sessionId: string, sessionCreated: Date) : Token {
+        let token: Token = {
+            response: JSON.stringify(data),
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+            validUntil: new Date(new Date().getTime() + ((data.expires_in - 5) * 1000)),
+            sessionId: sessionId,
+            sessionCreated: sessionCreated
+        };
+
+        if (this.tokenStore) {
+            this.logger?.LogDebug("Storing token in token store.");
+            this.tokenStore.storeToken(token);
+        }
+
+        return token;
     }
 }
