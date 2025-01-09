@@ -1,6 +1,6 @@
 {
   "name": "bmw-connected-drive",
-  "version": "2.3.1",
+  "version": "2.3.3",
   "description": "This package can be used to access the BMW ConnectedDrive services.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
