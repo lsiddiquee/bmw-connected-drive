@@ -6,7 +6,7 @@ import { LocalTokenStore } from "./LocalTokenStore";
 import { ILogger } from "./ILogger";
 import { Utils } from "./Utils";
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import crypto from "crypto";
 import {URLSearchParams} from "url";
 
@@ -22,7 +22,6 @@ export class Account {
     tokenStore?: ITokenStore;
     logger?: ILogger;
     captchaToken?: string;
-    session_id: string = uuidv4();
 
     constructor(username: string, password: string, region: Regions, tokenStore?: ITokenStore, logger?: ILogger, captchaToken?: string) {
         this.username = username;
@@ -43,29 +42,28 @@ export class Account {
             if (this.token.refreshToken) {
                 this.logger?.LogDebug("Attempting refreshing.");
                 try {
-                    const refreshToken = this.token.refreshToken;
+                    this.token = await this.refresh_token(this.token)
+                } catch (_e) {
                     this.token = undefined;
-                    this.token = await this.retrieveToken({
-                        "grant_type": "refresh_token",
-                        "refresh_token": refreshToken
-                    })
-                } catch {
-                    // Intentional empty catch, as if the refresh failed, we can attempt a normal token retrieval.
+                    this.logger?.LogError("Error occurred while refreshing token. Attempting normal token retrieval.");
+                    let e = _e as Error;
+                    if (e) {
+                        this.logger?.LogError(e.message);
+                    }
                 }
             } else {
                 this.token = undefined;
             }
         }
-        if (!this.token || !this.token?.accessToken) {
-            if(this.captchaToken){
+        if (!this.token || !this.token.accessToken) {
+            if (this.captchaToken) {
                 this.logger?.LogDebug("Getting token from token endpoint.");
-                this.token = await this.retrieveToken({
-                    "grant_type": "authorization_code",
-                    "username": this.username,
-                    "password": this.password
-                }, this.captchaToken);
-                this.captchaToken = undefined; // Delete becuse the captcha token is only valid for a short time and can only be used once
-            }else{
+                this.token = await this.login(
+                    this.username,
+                    this.password,
+                    this.captchaToken);
+                this.captchaToken = undefined; // Delete because the captcha token is only valid for a short time and can only be used once
+            } else {
                 this.logger?.LogDebug("Missing captcha token for first authentication.");
             }
         }
@@ -77,69 +75,53 @@ export class Account {
         return this.token;
     }
 
-    private async retrieveToken(parameters: any, captchaToken?: string): Promise<Token | undefined> {
-        const authSettingsUrl: string = `https://${Constants.ServerEndpoints[this.region]}/eadrax-ucs/v1/presentation/oauth/config`;
-        const correlationId = uuidv4();
+    private async login(username: string, password: string, captchaToken: string): Promise<Token> {
+        const oauthConfig = await this.retrieveOAuthConfig();
 
-        let serverResponse = await this.executeFetchWithRetry(authSettingsUrl, {
-            method: "GET",
-            headers: {
-                "ocp-apim-subscription-key": Constants.ApimSubscriptionKey[this.region],
-                "bmw-session-id": this.session_id,
-                "x-identity-provider": "gcdm",
-                "x-correlation-id": correlationId,
-                "bmw-correlation-id": correlationId
-            },
-            credentials: "same-origin"
-        }, response => response.ok);
-
-        let data = await serverResponse.json();
-        const clientId = data.clientId;
-        const clientSecret = data.clientSecret;
         const code_verifier = Account.base64UrlEncode(crypto.randomBytes(64));
         const hash = crypto.createHash('sha256');
         const code_challenge = Account.base64UrlEncode(hash.update(code_verifier).digest());
         const state = Account.base64UrlEncode(crypto.randomBytes(16));
-        const tokenUrl = data.tokenEndpoint;
-        const returnUrl = data.returnUrl;
 
         const baseOAuthParams = {
-            client_id: clientId,
+            client_id: oauthConfig.clientId,
             response_type: "code",
-            redirect_uri: returnUrl,
+            redirect_uri: oauthConfig.returnUrl,
             state: state,
             nonce: "login_nonce",
-            scope: data.scopes.join(" "),
+            scope: oauthConfig.scopes.join(" "),
             code_challenge: code_challenge,
             code_challenge_method: "S256"
         };
 
-        let body = {...baseOAuthParams, ...parameters};
-        this.logger?.LogTrace(JSON.stringify(body));
-
-        const authenticateUrl = data.tokenEndpoint.replace("/token", "/authenticate");
+        const authenticateUrl = oauthConfig.tokenEndpoint.replace("/token", "/authenticate");
         const headers = {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "hcaptchatoken": captchaToken
         } as any;
-        if(captchaToken) headers["hcaptchatoken"] = captchaToken;
 
-        serverResponse = await this.executeFetchWithRetry(authenticateUrl, {
+        let serverResponse = await this.executeFetchWithRetry(authenticateUrl, {
             method: "POST",
-            body: new URLSearchParams(body),
+            body: new URLSearchParams({
+                ...{
+                    grant_type: "authorization_code",
+                    username: username,
+                    password: password
+                },
+                ...baseOAuthParams
+            }),
             headers: headers,
             credentials: "same-origin"
         }, response => response.ok);
 
-        data = await serverResponse.json();
+        let data = await serverResponse.json();
         const authorization = Account.getQueryStringValue(data.redirect_to, "authorization");
 
         this.logger?.LogTrace(authorization);
 
-        body = {...baseOAuthParams, ...{authorization: authorization}};
-        this.logger?.LogTrace(JSON.stringify(body));
         serverResponse = await this.executeFetchWithRetry(authenticateUrl, {
             method: "POST",
-            body: new URLSearchParams(body),
+            body: new URLSearchParams({...baseOAuthParams, ...{authorization: authorization}}),
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
             },
@@ -153,13 +135,14 @@ export class Account {
 
         this.logger?.LogTrace(JSON.stringify(code));
 
-        const authHeaderValue = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-        serverResponse = await this.executeFetchWithRetry(tokenUrl, {
+        const authHeaderValue = Buffer.from(`${oauthConfig.clientId}:${oauthConfig.clientSecret}`).toString('base64');
+        
+        serverResponse = await this.executeFetchWithRetry(oauthConfig.tokenEndpoint, {
             method: "POST",
             body: new URLSearchParams({
                 code: code,
                 code_verifier: code_verifier,
-                redirect_uri: returnUrl,
+                redirect_uri: oauthConfig.returnUrl,
                 grant_type: "authorization_code"
             }),
             headers: {
@@ -171,23 +154,50 @@ export class Account {
 
         data = await serverResponse.json();
 
-        this.token = {
-            response: JSON.stringify(data),
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token,
-            validUntil: new Date(new Date().getTime() + ((data.expires_in - 5) * 1000))
-        };
+        return this.buildTokenAndStore(data);
+    }
 
-        if (this.tokenStore) {
-            this.logger?.LogDebug("Storing token in token store.");
-            this.tokenStore.storeToken(this.token);
-        }
+    private async refresh_token(token: Token): Promise<Token | undefined> {
+        const oauthConfig = await this.retrieveOAuthConfig();
+        
+        const authHeaderValue: string = Buffer.from(`${oauthConfig.clientId}:${oauthConfig.clientSecret}`).toString('base64');
 
-        return this.token;
+        let serverResponse = await this.executeFetchWithRetry(oauthConfig.tokenEndpoint, {
+            method: "POST",
+            body: new URLSearchParams({
+                grant_type: "refresh_token",
+                refresh_token: token.refreshToken,
+                scope: oauthConfig.scopes.join(" "),
+                redirect_uri: oauthConfig.returnUrl,
+            }),
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                authorization: `Basic ${authHeaderValue}`
+            },
+            credentials: "same-origin"
+        }, response => response.ok);
+
+        let data = await serverResponse.json();
+
+        return this.buildTokenAndStore(data);
+    }
+
+    private async retrieveOAuthConfig() {
+        const authSettingsUrl: string = `https://${Constants.ServerEndpoints[this.region]}/eadrax-ucs/v1/presentation/oauth/config`;
+        let serverResponse = await this.executeFetchWithRetry(authSettingsUrl, {
+            method: "GET",
+            headers: {
+                "ocp-apim-subscription-key": Constants.ApimSubscriptionKey[this.region],
+                "x-identity-provider": "gcdm",
+            },
+            credentials: "same-origin"
+        }, response => response.ok);
+
+        return await serverResponse.json();
     }
 
     private async executeFetchWithRetry(url: string, init: any, responseValidator: (response: Response) => boolean): Promise<Response> {
-        const correlationId = uuidv4();
+        const correlationId = uuid();
         let response: Response;
         let retryCount = 0;
         init.headers["user-agent"] = Constants.User_Agent;
@@ -229,5 +239,21 @@ export class Account {
     
     private static base64UrlEncode(buffer: Buffer):string{
         return buffer.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+    
+    private buildTokenAndStore(data: any) : Token {
+        let token: Token = new Token({
+            response: JSON.stringify(data),
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+            validUntil: new Date(new Date().getTime() + ((data.expires_in - 5) * 1000))
+        });
+
+        if (this.tokenStore) {
+            this.logger?.LogDebug("Storing token in token store.");
+            this.tokenStore.storeToken(token);
+        }
+
+        return token;
     }
 }
