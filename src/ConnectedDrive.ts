@@ -8,7 +8,7 @@ import { Regions } from "./Regions";
 import { ITokenStore } from "./ITokenStore";
 import { ILogger } from "./ILogger";
 import { Capabilities, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./VehicleApiResponse";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { Utils } from "./Utils";
 import { CarView } from "./CarView";
 
@@ -23,19 +23,29 @@ export class ConnectedDrive {
     }
 
     async getVehicles(): Promise<Vehicle[]> {
-        this.logger?.LogInformation("Getting vehicles");
-        const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
+        this.logger?.LogInformation("Getting all vehicles");
         let result: Vehicle[] = [];
         for (let key in CarBrand) {
             const brand: CarBrand = CarBrand[key as keyof typeof CarBrand];
 
-            this.logger?.LogInformation(`Getting ${brand} vehicles`);
-
-            const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}?${params}`;
-            let vehicles = await this.getFromJson(url, brand);
+            let vehicles = await this.getVehiclesByBrand(brand);
             result.push(...vehicles);
         }
         return (result);
+    }
+
+    async getVehiclesByBrand(brand: CarBrand): Promise<Vehicle[]> {
+        this.logger?.LogInformation(`Getting ${brand} vehicles`);
+
+        const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
+        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}?${params}`;
+        const vehicles = await this.getFromJson(url, brand);
+
+        // Patching the brand to the vehicles as the brand returned might be "BMW_I"
+        // https://github.com/lsiddiquee/com.rexwel.bmwconnected/issues/56
+        vehicles.forEach((vehicle: Vehicle) => vehicle.attributes.brand = brand);
+
+        return vehicles;
     }
 
     async getVehicleStatus(vin: string, brand: CarBrand = CarBrand.Bmw): Promise<VehicleStatus> {
@@ -168,12 +178,12 @@ export class ConnectedDrive {
     }
 
     async request(url: string, brand: CarBrand = CarBrand.Bmw, isPost: boolean = false, requestBody?: any, headers: any = {}): Promise<Response> {
-        const correlationId = uuidv4();
+        const correlationId = uuid();
         const httpMethod = isPost ? "POST" : "GET";
         const requestBodyContent = requestBody ? JSON.stringify(requestBody) : null;
         let retryCount = 0;
 
-        const defaultHeaders = {
+        const completeHeaders = {
             "accept": "application/json",
             "accept-language": "en",
             "content-type": "application/json;charset=UTF-8",
@@ -183,7 +193,8 @@ export class ConnectedDrive {
             "x-identity-provider": "gcdm",
             "bmw-session-id": correlationId,
             "x-correlation-id": correlationId,
-            "bmw-correlation-id": correlationId
+            "bmw-correlation-id": correlationId,
+            ...headers
         };
 
         let response: Response;
@@ -195,11 +206,12 @@ export class ConnectedDrive {
             response = await fetch(url, {
                 method: httpMethod,
                 body: requestBodyContent,
-                headers: { ...defaultHeaders, ...headers },
+                headers: completeHeaders,
                 credentials: "same-origin"
             });
 
-            this.logger?.LogTrace(`Request: ${url}, Method: ${httpMethod}, Headers: ${JSON.stringify(headers)}, Body: ${requestBodyContent}`);
+            completeHeaders["authorization"] = "Bearer xxx"; // Mask the token in the logs
+            this.logger?.LogTrace(`Request: ${url}, Method: ${httpMethod}, Headers: ${JSON.stringify(completeHeaders)}, Body: ${requestBodyContent}`);
             this.logger?.LogTrace(`Response: ${response.status}, Headers: ${JSON.stringify(response.headers)}`);
         } while (retryCount++ < 5 && (response.status === 429 || (response.status === 403 && response.statusText.includes("quota"))));
 
