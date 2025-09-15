@@ -17,9 +17,9 @@ export class Constants {
     }
 
     static readonly AppVersions: EndpointMap = {
-        NorthAmerica: "3.11.1(29513)",
-        RestOfWorld: "3.11.1(29513)",
-        China: "3.11.1(29513)",
+        NorthAmerica: "4.9.2(36892)",
+        RestOfWorld: "4.9.2(36892)",
+        China: "4.9.2(36892)",
     }
 
     static readonly RegionCodes: EndpointMap = {
@@ -28,8 +28,8 @@ export class Constants {
         China: "cn",
     }
 
-    static readonly User_Agent: string = "Dart/2.19 (dart:io)";
-    static X_User_Agent = (region: Regions, brand: CarBrand = CarBrand.Bmw) => `android(TQ2A.230405.003.B2);${brand.toLowerCase()};${this.AppVersions[region]};${this.RegionCodes[region]}`;        
+    static readonly User_Agent: string = "Dart/3.3 (dart:io)";
+    static X_User_Agent = (build_string: string, region: Regions, brand: CarBrand = CarBrand.Bmw) => `android(${build_string});${brand.toLowerCase()};${this.AppVersions[region]};${this.RegionCodes[region]}`;        
     
     static readonly getVehicles: string = "/eadrax-vcs/v4/vehicles";
     static readonly remoteServicesBaseUrl: string = "/eadrax-vrccs/v3/presentation/remote-commands";

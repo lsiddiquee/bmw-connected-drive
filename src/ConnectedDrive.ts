@@ -189,7 +189,7 @@ export class ConnectedDrive {
             "content-type": "application/json;charset=UTF-8",
             "authorization": `Bearer ${(await this.account.getToken()).accessToken}`,
             "user-agent": Constants.User_Agent,
-            "x-user-agent": Constants.X_User_Agent(this.account.region, brand),
+            "x-user-agent": Constants.X_User_Agent(Utils.getXUserAgentBuildString(), this.account.region, brand),
             "x-identity-provider": "gcdm",
             "bmw-session-id": correlationId,
             "x-correlation-id": correlationId,
