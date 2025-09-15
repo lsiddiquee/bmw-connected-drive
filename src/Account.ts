@@ -201,7 +201,7 @@ export class Account {
         let response: Response;
         let retryCount = 0;
         init.headers["user-agent"] = Constants.User_Agent;
-        init.headers["x-user-agent"] = Constants.X_User_Agent(this.region);
+        init.headers["x-user-agent"] = Constants.X_User_Agent(Utils.getXUserAgentBuildString(), this.region);
         init.headers["x-identity-provider"] = "gcdm";
         init.headers["bmw-session-id"] = correlationId;
         init.headers["x-correlation-id"] = correlationId;
