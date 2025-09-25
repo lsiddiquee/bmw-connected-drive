@@ -7,7 +7,7 @@ import { CarBrand } from "./CarBrand";
 import { Regions } from "./Regions";
 import { ITokenStore } from "./ITokenStore";
 import { ILogger } from "./ILogger";
-import { Capabilities, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./VehicleApiResponse";
+import { Capabilities, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./Models";
 import { v4 as uuid } from 'uuid';
 import { Utils } from "./Utils";
 import { CarView } from "./CarView";

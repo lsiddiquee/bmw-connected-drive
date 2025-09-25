@@ -12,7 +12,7 @@ import { RemoteServices } from "./RemoteServices"
 import { DetailedServiceStatus } from "./DetailedServiceStatus"
 import { RemoteServiceExecutionState } from "./RemoteServiceExecutionState"
 import { RemoteServiceExecutionStateDetailed } from "./RemoteServiceExecutionStateDetailed"
-import { Capabilities, ChargingProfile, ChargingSettings, CheckControlMessage, Coordinates, Address, DepartureTime, DriverGuideInfo,  ReductionOfChargeCurrent, RemoteServiceRequestResponse, RequiredService, TireStatus, TireStatusInfo, Vehicle, Attributes, SoftwareVersion, PuStep, MappingInfo, VehicleStatus, Time, ClimateControlState, ClimateTimer, CombustionFuelLevel, DoorsState, DriverPreferences, ElectricChargingState, TireStatuses, WindowsState, DigitalKey, RemoteChargingCommands, LocationInfo } from "./VehicleApiResponse"
+import { Capabilities, ChargingProfile, ChargingSettings, CheckControlMessage, Coordinates, Address, DepartureTime, DriverGuideInfo,  ReductionOfChargeCurrent, RemoteServiceRequestResponse, RequiredService, TireStatus, TireStatusInfo, Vehicle, Attributes, SoftwareVersion, PuStep, MappingInfo, VehicleStatus, Time, ClimateControlState, ClimateTimer, CombustionFuelLevel, DoorsState, DriverPreferences, ElectricChargingState, TireStatuses, WindowsState, DigitalKey, RemoteChargingCommands, LocationInfo } from "./Models"
 import { Utils } from "./Utils";
 
 export {
