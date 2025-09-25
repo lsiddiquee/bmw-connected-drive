@@ -7,7 +7,7 @@ import { CarBrand } from "./CarBrand";
 import { Regions } from "./Regions";
 import { ITokenStore } from "./ITokenStore";
 import { ILogger } from "./ILogger";
-import { Capabilities, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./Models";
+import { Capabilities, ChargingDetailsResponse, ChargingProfile, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./Models";
 import { v4 as uuid } from 'uuid';
 import { Utils } from "./Utils";
 import { CarView } from "./CarView";
@@ -62,6 +62,21 @@ export class ConnectedDrive {
         const params = `apptimezone=${120}&appDateTime=${Date.now()}`;
         const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.getVehicles}/state?${params}`;
         return (await this.getFromJson(url, brand, { "bmw-vin": vin })).capabilities;
+    }
+
+    async getChargingDetails(vin: string, brand: CarBrand = CarBrand.Bmw, hasChargingSettingsCapabilities: boolean = false): Promise<ChargingDetailsResponse> {
+        this.logger?.LogInformation("Getting vehicle charging details.");
+
+        const fetchedAt = new Date().toISOString();
+        const params = `fields=charging-profile&has_charging_settings_capabilities=${hasChargingSettingsCapabilities}`;
+        const url: string = `https://${Constants.ServerEndpoints[this.account.region]}${Constants.vehicleChargingDetailsUrl}?${params}`;
+        
+        const headers = {
+            "bmw-current-date": fetchedAt,
+            "bmw-vin": vin
+        };
+
+        return await this.getFromJson(url, brand, headers);
     }
 
     async lockDoors(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {

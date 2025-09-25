@@ -377,3 +377,89 @@ export interface RemoteServiceRequestResponse {
     eventId: string;
     creationTime: string;
 }
+
+// Charging Details API Response Interfaces
+export interface ChargingDetailsResponse {
+    chargeAndClimateSettings:     ChargeAndClimateSettings;
+    chargeAndClimateTimerDetail:  ChargeAndClimateTimerDetail;
+    chargingFlapDetail?:          ChargingFlapDetail;
+    chargingSettingsDetail?:      ChargingSettingsDetail;
+    servicePack:                  string;
+}
+
+export interface ChargeAndClimateSettings {
+    chargeAndClimateTimer:  ChargeAndClimateTimer;
+    chargingFlap?:          ChargingFlap;
+    chargingSettings?:      ChargingSettingsLabels;
+}
+
+export interface ChargeAndClimateTimer {
+    chargingMode?:                string;
+    chargingModeSemantics?:       string;
+    departureTimer?:              string[];
+    departureTimerSemantics?:     string;
+    preconditionForDeparture?:    string;
+    showDepartureTimers:          boolean;
+}
+
+export interface ChargingFlap {
+    permanentlyUnlockLabel: string;
+}
+
+export interface ChargingSettingsLabels {
+    acCurrentLimitLabel?:               string;
+    acCurrentLimitLabelSemantics?:      string;
+    chargingTargetLabel?:               string;
+    dcLoudnessLabel?:                   string;
+    unlockCableAutomaticallyLabel?:     string;
+}
+
+export interface ChargeAndClimateTimerDetail {
+    chargingMode:                    ChargingModeDetail;
+    departureTimer:                  DepartureTimerDetail;
+    isPreconditionForDepartureActive: boolean;
+}
+
+export interface ChargingModeDetail {
+    chargingPreference: string;
+    endTimeSlot:        string;
+    startTimeSlot:      string;
+    type:               string;
+}
+
+export interface DepartureTimerDetail {
+    type:          string;
+    weeklyTimers:  WeeklyTimer[];
+}
+
+export interface WeeklyTimer {
+    daysOfTheWeek: string[];
+    id:            number;
+    time:          string;
+    timerAction:   string;
+}
+
+export interface ChargingFlapDetail {
+    isPermanentlyUnlock: boolean;
+}
+
+export interface ChargingSettingsDetail {
+    acLimit:                     AcLimit;
+    chargingTarget:              number;
+    dcLoudness:                  string;
+    isUnlockCableActive:         boolean;
+    minChargingTargetToWarning:  number;
+}
+
+export interface AcLimit {
+    current:      CurrentLimit;
+    isUnlimited:  boolean;
+    max:          number;
+    min:          number;
+    values:       number[];
+}
+
+export interface CurrentLimit {
+    unit:  string;
+    value: number;
+}
