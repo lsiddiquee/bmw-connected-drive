@@ -444,11 +444,12 @@ export interface ChargingFlapDetail {
 }
 
 export interface ChargingSettingsDetail {
-    acLimit:                     AcLimit;
-    chargingTarget:              number;
-    dcLoudness:                  string;
-    isUnlockCableActive:         boolean;
-    minChargingTargetToWarning:  number;
+    acLimit?:                     AcLimit;
+    chargingTarget?:             number;
+    dcLoudness?:                 string;
+    isUnlockCableActive?:        boolean;
+    minChargingTargetToWarning?: number;
+    acLimitValue?:               number;
 }
 
 export interface AcLimit {

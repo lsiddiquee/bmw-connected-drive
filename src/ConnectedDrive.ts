@@ -7,7 +7,7 @@ import { CarBrand } from "./CarBrand";
 import { Regions } from "./Regions";
 import { ITokenStore } from "./ITokenStore";
 import { ILogger } from "./ILogger";
-import { Capabilities, ChargingDetailsResponse, ChargingProfile, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./Models";
+import { Capabilities, ChargingDetailsResponse, ChargingProfile, ChargingSettingsDetail, RemoteServiceRequestResponse, Vehicle, VehicleStatus } from "./Models";
 import { v4 as uuid } from 'uuid';
 import { Utils } from "./Utils";
 import { CarView } from "./CarView";
@@ -81,44 +81,49 @@ export class ConnectedDrive {
 
     async lockDoors(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Locking doors");
-        return await this.executeService(vin, brand, RemoteServices.LockDoors, {}, waitExecution);
+        return await this.executeService(vin, brand, RemoteServices.LockDoors, {}, {}, waitExecution);
     }
 
     async unlockDoors(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Unlocking doors");
-        return await this.executeService(vin, brand, RemoteServices.UnlockDoors, {}, waitExecution);
+        return await this.executeService(vin, brand, RemoteServices.UnlockDoors, {}, {}, waitExecution);
     }
 
     async startClimateControl(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Start Climate Control");
-        return await this.executeService(vin, brand, RemoteServices.ClimateNow, { "action": "START" }, waitExecution);
+        return await this.executeService(vin, brand, RemoteServices.ClimateNow, { "action": "START" }, {}, waitExecution);
     }
 
     async stopClimateControl(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Stop Climate Control");
-        return await this.executeService(vin, brand, RemoteServices.ClimateNow, { "action": "STOP" }, waitExecution);
+        return await this.executeService(vin, brand, RemoteServices.ClimateNow, { "action": "STOP" }, {}, waitExecution);
     }
 
     async flashLights(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
-        return await this.executeService(vin, brand, RemoteServices.FlashLight, {}, waitExecution);
+        return await this.executeService(vin, brand, RemoteServices.FlashLight, {}, {}, waitExecution);
     }
 
     async blowHorn(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Blow Horn");
-        return await this.executeService(vin, brand, RemoteServices.BlowHorn, {}, waitExecution);
+        return await this.executeService(vin, brand, RemoteServices.BlowHorn, {}, {}, waitExecution);
     }
 
     async startCharging(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Start Charging");
-        return await this.executeService(vin, brand, RemoteServices.ChargeStart, {}, waitExecution, Constants.vehicleChargingStartStopUrl);
+        return await this.executeService(vin, brand, RemoteServices.ChargeStart, {}, {}, waitExecution, Constants.vehicleChargingStartStopUrl);
     }
 
     async stopCharging(vin: string, brand: CarBrand = CarBrand.Bmw, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
         this.logger?.LogInformation("Stop Charging");
-        return await this.executeService(vin, brand, RemoteServices.ChargeStop, {}, waitExecution, Constants.vehicleChargingStartStopUrl);
+        return await this.executeService(vin, brand, RemoteServices.ChargeStop, {}, {}, waitExecution, Constants.vehicleChargingStartStopUrl);
     }
 
-    private async executeService(vin: string, brand: CarBrand, serviceType: RemoteServices, params: { [key: string]: string }, waitExecution: boolean, remoteServiceUrl: string = Constants.executeRemoteServices): Promise<RemoteServiceRequestResponse> {
+    async setChargingSettings(vin: string, brand: CarBrand = CarBrand.Bmw, chargingSettingsDetail: ChargingSettingsDetail, waitExecution: boolean = false): Promise<RemoteServiceRequestResponse> {
+        this.logger?.LogInformation("Set Charging Settings");
+        return await this.executeService(vin, brand, RemoteServices.SetChargingSettings, {}, chargingSettingsDetail, waitExecution, Constants.vehicleChargingSettingsSetUrl);
+    }
+
+    private async executeService(vin: string, brand: CarBrand, serviceType: RemoteServices, params: { [key: string]: string }, requestBody: any = {}, waitExecution: boolean, remoteServiceUrl: string = Constants.executeRemoteServices): Promise<RemoteServiceRequestResponse> {
         let url: string = `https://${Constants.ServerEndpoints[this.account.region]}${remoteServiceUrl}`;
         url = url.replace("{vehicleVin}", vin);
         url = url.replace("{serviceType}", serviceType);
@@ -135,7 +140,7 @@ export class ConnectedDrive {
             url += `?${queryString}`;
         }
 
-        const response: RemoteServiceRequestResponse = await this.postAsJson(url, brand, {}, headers);
+        const response: RemoteServiceRequestResponse = await this.postAsJson(url, brand, requestBody, headers);
 
         if (waitExecution) {
             let status: RemoteServiceExecutionState = RemoteServiceExecutionState.UNKNOWN;
