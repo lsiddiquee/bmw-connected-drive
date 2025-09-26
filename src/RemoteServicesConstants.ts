@@ -1,4 +1,4 @@
-export enum RemoteServices {
+export enum RemoteServicesConstants {
     /** climate */
     ClimateNow = "climate-now",
     /** lock */

@@ -220,13 +220,13 @@ export interface TireDetails {
     manufacturingWeek:        number;
     isOptimizedForOemBmw:     boolean;
     partNumber:               string;
-    speedClassification:      SpeedClassification;
+    speedClassification:      TireSpeedClassification;
     mountingDate:             string;
     season:                   number;
     identificationInProgress: boolean;
 }
 
-export interface SpeedClassification {
+export interface TireSpeedClassification {
     speedRating: number;
     atLeast:     boolean;
 }
