@@ -8,11 +8,11 @@ import { Account } from "./Account"
 import { CarBrand } from "./CarBrand"
 import { CarView } from "./CarView"
 import { ConnectedDrive } from "./ConnectedDrive"
-import { RemoteServices } from "./RemoteServices"
+import { RemoteServicesConstants } from "./RemoteServicesConstants"
 import { DetailedServiceStatus } from "./DetailedServiceStatus"
 import { RemoteServiceExecutionState } from "./RemoteServiceExecutionState"
 import { RemoteServiceExecutionStateDetailed } from "./RemoteServiceExecutionStateDetailed"
-import { Capabilities, ChargingProfile, ChargingSettings, CheckControlMessage, Coordinates, Address, DepartureTime, DriverGuideInfo,  ReductionOfChargeCurrent, RemoteServiceRequestResponse, RequiredService, TireStatus, TireStatusInfo, Vehicle, Attributes, SoftwareVersion, PuStep, MappingInfo, VehicleStatus, Time, ClimateControlState, ClimateTimer, CombustionFuelLevel, DoorsState, DriverPreferences, ElectricChargingState, TireStatuses, WindowsState, DigitalKey, RemoteChargingCommands, LocationInfo } from "./VehicleApiResponse"
+import { Capabilities, ChargingProfile, ChargingSettings, ChargingDetailsResponse, ChargeAndClimateSettings, ChargeAndClimateTimer, ChargingFlap, ChargingSettingsLabels, ChargeAndClimateTimerDetail, ChargingModeDetail, DepartureTimerDetail, WeeklyTimer, ChargingFlapDetail, ChargingSettingsDetail, AcLimit, CurrentLimit, CheckControlMessage, Coordinates, Address, DepartureTime, DriverGuideInfo,  ReductionOfChargeCurrent, RemoteServiceRequestResponse, RequiredService, TireStatus, TireStatusInfo, Vehicle, Attributes, SoftwareVersion, PuStep, MappingInfo, VehicleStatus, Time, ClimateControlState, ClimateTimer, CombustionFuelLevel, DoorsState, DriverPreferences, ElectricChargingState, TireStatuses, WindowsState, DigitalKey, RemoteChargingCommands, LocationInfo, IStep, LoggedInProfile, Battery, TireDetails, RemoteServices, PersonalPictureUpload, ThirdPartyAppStore, LocationBasedCommerceFeatures, ProfileInfo, TireSpeedClassification, RemoteService, RemoteServiceFunctions } from "./Models"
 import { Utils } from "./Utils";
 
 export {
@@ -26,7 +26,7 @@ export {
     CarBrand,
     CarView,
     ConnectedDrive,
-    RemoteServices,
+    RemoteServicesConstants,
     DetailedServiceStatus,
     RemoteServiceExecutionState,
     RemoteServiceExecutionStateDetailed,
@@ -39,6 +39,19 @@ export {
     VehicleStatus,
     ChargingProfile,
     ChargingSettings,
+    ChargingDetailsResponse,
+    ChargeAndClimateSettings,
+    ChargeAndClimateTimer,
+    ChargingFlap,
+    ChargingSettingsLabels,
+    ChargeAndClimateTimerDetail,
+    ChargingModeDetail,
+    DepartureTimerDetail,
+    WeeklyTimer,
+    ChargingFlapDetail,
+    ChargingSettingsDetail,
+    AcLimit,
+    CurrentLimit,
     DepartureTime,
     Time,
     ReductionOfChargeCurrent,
@@ -54,12 +67,24 @@ export {
     Coordinates,
     RequiredService,
     TireStatuses,
-    TireStatusInfo as TireStatusInternal,
+    TireStatusInfo,
     TireStatus,
     WindowsState,
     Capabilities,
     DigitalKey,
     RemoteChargingCommands,
     RemoteServiceRequestResponse,
-    Utils
+    Utils,
+    IStep,
+    LoggedInProfile,
+    Battery,
+    TireDetails,
+    RemoteServices,
+    PersonalPictureUpload,
+    ThirdPartyAppStore,
+    LocationBasedCommerceFeatures,
+    ProfileInfo,
+    TireSpeedClassification,
+    RemoteService,
+    RemoteServiceFunctions
 }

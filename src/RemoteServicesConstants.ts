@@ -1,4 +1,4 @@
-export enum RemoteServices {
+export enum RemoteServicesConstants {
     /** climate */
     ClimateNow = "climate-now",
     /** lock */
@@ -12,5 +12,9 @@ export enum RemoteServices {
     /** start charging */
     ChargeStart = "start-charging",
     /** stop charging */
-    ChargeStop = "stop-charging"
+    ChargeStop = "stop-charging",
+    /** set charging settings **/
+    SetChargingSettings = "set-charging-settings",
+    /** set charging profile **/
+    SetChargingProfile = "set-charging-profile"
 }
